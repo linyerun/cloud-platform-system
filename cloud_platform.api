@@ -1,0 +1,169 @@
+syntax = "v1"
+
+info (
+	title:   "cloud platform system"
+	desc:    "后端"
+	author:  "LinYeRun"
+	email:   "type email here"
+	version: "v1"
+)
+
+@server (
+	prefix: /v0
+	group:  v0
+)
+service cloud_platform {
+	@handler Register // 注册
+	post /user/register (UserRegisterRequest) returns (CommonResponse)
+
+	@handler Login // 登录
+	post /user/login (UserLoginRequest) returns (CommonResponse)
+
+	@handler CaptchaPicture // 获取验证码图片
+	get /user/captcha returns (CaptchaPictureResponse)
+
+	@handler CaptchaEmail // 发送验证码图片到邮箱
+	get /user/captcha/email (CaptchaEmailRequest) returns (CommonResponse)
+}
+
+@server (
+	prefix:     /v1
+	group:      v1
+	middleware: JwtAuth,Visitor
+)
+service cloud_platform {
+	// 获取管理员列表，用于游客发送升级申请
+	@handler GetAdmins
+	get /admin/all returns (CommonResponse)
+
+	// 向管理员申请转为user
+	@handler ToUser
+	post /to/user (ApplicationFormPostRequest) returns (CommonResponse)
+}
+
+@server (
+	prefix:     /v2
+	group:      v2
+	middleware: JwtAuth,User // 校验: token有效, user的auth为0
+)
+service cloud_platform {
+	// 获取镜像列表
+	@handler UserGetImages
+	get /user/image/list returns (CommonResponse)
+}
+
+@server (
+	prefix:     /v3
+	group:      v3
+	middleware: JwtAuth,Admin
+)
+service cloud_platform {
+	// 拉取镜像
+	@handler PullImage
+	post /image/pull (ImagePullRequest) returns (CommonResponse)
+
+	// 删除镜像
+	@handler DeleteImage
+	delete /image/del (ImageDelRequest) returns (CommonResponse)
+
+	// 获取镜像列表
+	@handler AdminGetImages
+	get /admin/image/list returns (CommonResponse)
+
+	// 查看自己管理用户的容器列表
+	@handler GetContainerList
+	get /container/list returns (CommonResponse)
+
+	// 删除管理用户的容器列表
+	@handler DeleteContainer
+	delete /container/:id (DeleteContainerRequest) returns (CommonResponse)
+
+	// 获取不同状态申请单列表
+	@handler GetFormByStatus
+	get /application_forms/:status (ApplicationFormPostRequest) returns (CommonResponse)
+
+	// 处理游客身份转正申请
+	@handler VisitorToUser
+	put /visitor_to_user/:visitor_id (PutVisitorToUserRequest) returns (CommonResponse)
+
+	// 获取名下用户信息
+	@handler GetUsers
+	get /users returns (CommonResponse)
+
+	// 删除名下用户
+	@handler DeleteUserById
+	delete /user/del/:id (DeleteUserRequest) returns (CommonResponse)
+}
+
+@server (
+	prefix:     /v4
+	group:      v4
+	middleware: JwtAuth,Super
+)
+service cloud_platform {
+	@handler CreateAdmin
+	post /create_admin (CreateAdminRequest) returns (CommonResponse)
+}
+
+@server (
+	prefix:     /v5
+	group:      v5
+	middleware: JwtAuth
+)
+service cloud_platform {
+	// 刷新token
+	@handler RefreshToken
+	put /token/refresh returns (CommonResponse)
+}
+
+type (
+	UserRegisterRequest {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Name     string `json:"name"`
+		Captcha  string `json:"captcha"`
+	}
+	UserLoginRequest {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Captcha  string `json:"captcha"`
+	}
+	CaptchaPictureResponse {
+		PicData []byte `json:"pic_data"`
+	}
+	CaptchaEmailRequest {
+		Email string `form:"email"`
+	}
+	ImagePullRequest {
+		ImageName string `json:"image_name"`
+	}
+	ImageDelRequest {
+		ImageName string `json:"image_name"`
+	}
+	ApplicationFormPostRequest {
+		AdminId string `json:"admin_id"`
+	}
+	GetApplicationFormByStatusRequest {
+		Status uint `path:"status"`
+	}
+	PutVisitorToUserRequest {
+		VisitorId string `path:"visitor_id"`
+	}
+	CreateAdminRequest {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Name     string `json:"name"`
+	}
+	DeleteContainerRequest {
+		ContainerId string `path:"id"`
+	}
+	DeleteUserRequest {
+		UserId string `path:"id"`
+	}
+	CommonResponse {
+		Code int         `json:"code"`
+		Msg  string      `json:"msg"`
+		Data interface{} `json:"data,omitempty"`
+	}
+)
+

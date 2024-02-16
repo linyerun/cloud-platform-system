@@ -1,0 +1,24 @@
+Name: cloud_platform
+Host: 0.0.0.0
+Port: 8888
+Salt: ErineLinSalt    # 哈希加密时用到的盐(密钥)
+
+Captcha:
+  Width: 770
+  Height: 360
+
+Mongo:
+  Address: 192.168.200.133
+  Port: 27017
+  Username: root
+  Password: root
+  AuthSource: admin
+  DbName: cloud-platform-system
+
+Redis:
+  Address: 192.168.200.133
+  Port: 6379
+  Password: redis
+
+Jwt:
+  ExpireSec: 1800
