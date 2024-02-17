@@ -38,6 +38,10 @@ type GetApplicationFormByStatusRequest struct {
 	Status uint `path:"status"`
 }
 
+type GetFormByStatusRequest struct {
+	Status uint `path:"status"`
+}
+
 type ImageDelRequest struct {
 	ImageName string `json:"image_name"`
 }

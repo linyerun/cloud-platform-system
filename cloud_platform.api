@@ -80,7 +80,7 @@ service cloud_platform {
 
 	// 获取不同状态申请单列表
 	@handler GetFormByStatus
-	get /application_forms/:status (ApplicationFormPostRequest) returns (CommonResponse)
+	get /application_forms/:status (GetFormByStatusRequest) returns (CommonResponse)
 
 	// 处理游客身份转正申请
 	@handler VisitorToUser
@@ -160,6 +160,9 @@ type (
 	}
 	DeleteUserRequest {
 		UserId string `path:"id"`
+	}
+	GetFormByStatusRequest {
+		Status uint `path:"status"`
 	}
 	CommonResponse {
 		Code int         `json:"code"`
