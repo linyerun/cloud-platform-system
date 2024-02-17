@@ -141,7 +141,8 @@ type (
 		ImageName string `json:"image_name"`
 	}
 	ApplicationFormPostRequest {
-		AdminId string `json:"admin_id"`
+		AdminId    string `json:"admin_id"`
+		AdminEmail string `json:"admin_email"`
 	}
 	GetApplicationFormByStatusRequest {
 		Status uint `path:"status"`
