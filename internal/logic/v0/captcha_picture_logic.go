@@ -1,10 +1,11 @@
 package v0
 
 import (
-	"context"
-
 	"cloud-platform-system/internal/svc"
 	"cloud-platform-system/internal/types"
+	"cloud-platform-system/internal/utils"
+	"context"
+	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +25,11 @@ func NewCaptchaPictureLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ca
 }
 
 func (l *CaptchaPictureLogic) CaptchaPicture() (resp *types.CaptchaPictureResponse, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	// 生成验证码图片
+	buff, err := utils.GenerateCaptchaImgBuffer(l.Logger, l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, l.svcCtx.Config.Captcha.Width, l.svcCtx.Config.Captcha.Height)
+	if err != nil {
+		l.Logger.Error(errors.Wrap(err, "can not generate captcha"))
+		return nil, errors.New("系统错误，生成验证码失败！")
+	}
+	return &types.CaptchaPictureResponse{PicData: buff.Bytes()}, nil
 }

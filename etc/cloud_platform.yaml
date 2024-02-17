@@ -3,6 +3,12 @@ Host: 0.0.0.0
 Port: 8888
 Salt: ErineLinSalt    # 哈希加密时用到的盐(密钥)
 
+Log:
+  ServiceName: cloud-platform-system
+  Encoding: plain
+  Level: debug
+  Path: logs
+
 Captcha:
   Width: 770
   Height: 360

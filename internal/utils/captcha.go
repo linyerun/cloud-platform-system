@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/dchest/captcha"
+	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
+	"github.com/zeromicro/go-zero/core/logx"
 	"math/rand"
 	"time"
 )
@@ -24,10 +26,11 @@ func GetRandomDigits(arrLen uint) []byte {
 }
 
 func BytesNumsToStringNums(digits []byte) string {
+	dst := make([]byte, len(digits))
 	for i := 0; i < len(digits); i++ {
-		digits[i] += '0'
+		dst[i] = digits[i] + '0'
 	}
-	return string(digits)
+	return string(dst)
 }
 
 // WriteCaptchaImage given digits, where each digit must be in range 0-9. image suffix is png.
@@ -49,4 +52,21 @@ func IsValidCaptcha(redisClient *redis.Client, CAPTCHA string, captchaStr string
 		return false
 	}
 	return false
+}
+
+func GenerateCaptchaImgBuffer(log logx.Logger, redisClient *redis.Client, CAPTCHA string, width, height int) (*bytes.Buffer, error) {
+	// 避免重复
+	var digits []byte
+	for {
+		digits = GetRandomDigits(6)
+		err := redisClient.Get(context.Background(), fmt.Sprintf(CAPTCHA, BytesNumsToStringNums(digits))).Err()
+		if err == redis.Nil {
+			break
+		} else if err != nil {
+			log.Error(errors.Wrap(err, "redis获取数据异常"))
+			return nil, errors.New("redis获取数据异常")
+		}
+	}
+	// 生成验证码图片缓存
+	return WriteCaptchaImage(redisClient, CAPTCHA, digits, width, height)
 }

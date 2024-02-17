@@ -1,6 +1,7 @@
 package v0
 
 import (
+	"cloud-platform-system/internal/types"
 	"net/http"
 
 	"cloud-platform-system/internal/logic/v0"
@@ -13,9 +14,13 @@ func CaptchaPictureHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		l := v0.NewCaptchaPictureLogic(r.Context(), svcCtx)
 		resp, err := l.CaptchaPicture()
 		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			httpx.OkJsonCtx(r.Context(), w, &types.CommonResponse{Code: 500, Msg: err.Error()})
 		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(resp.PicData)
 		}
 	}
 }

@@ -6,5 +6,9 @@ import (
 )
 
 func TestSendText(t *testing.T) {
-	utils.SendTextByEmail("linyerundgut@126.com", "哈哈哈哈")
+	err := utils.SendTextByEmail("linyerundgut@126.com", "注册通知", "注册成功!")
+	if err != nil {
+		t.Fatal(err)
+	}
+	//utils.SendTextByEmail("2338244917@qq.com", "哈哈哈哈")
 }

@@ -28,8 +28,8 @@ func SendCaptchaByEmail(recipientEmail string, imageData *bytes.Buffer) error {
 }
 
 // SendTextByEmail 发送文字
-func SendTextByEmail(recipientEmail, text string) error {
-	return NewMyMailOfQQ().SendText(recipientEmail, text)
+func SendTextByEmail(recipientEmail, subject, text string) error {
+	return NewMyMailOfQQ().SendText(recipientEmail, text, subject)
 }
 
 type MyMail struct {
@@ -118,14 +118,9 @@ func (m *MyMail) SendImg(recipientEmail, subject string, fileData []byte) error 
 	return err
 }
 
-func (m *MyMail) SendText(recipientEmail, text string) error {
-	to := []string{recipientEmail}
-	message := []byte(text)
-
-	auth := smtp.PlainAuth("", m.username, m.password, m.port)
-	err := smtp.SendMail(m.host+":"+m.port, auth, m.username, to, message)
-	if err != nil {
-		return err
-	}
-	return nil
+func (m *MyMail) SendText(recipientEmail, text, subject string) error {
+	contentType := "Content-Type: text/plain" + "; charset=UTF-8"
+	// From需要在To之前
+	msg := []byte("From: " + m.username + "\r\nTo: " + recipientEmail + "\r\nSubject: " + subject + "\r\n" + contentType + "\r\n\r\n" + text)
+	return smtp.SendMail(m.host+":"+m.port, m.auth, m.username, []string{recipientEmail}, msg)
 }

@@ -24,7 +24,7 @@ func TestInsertSuperAdmin(t *testing.T) {
 		// TODO: 为啥运行太快获取的是零值的Base64
 		Id:       utils.GetSnowFlakeIdAndBase64(),
 		Email:    "linyerun0620@qq.com",
-		Password: utils.DoHashAndBase64(svcCtx, "123456"),
+		Password: utils.DoHashAndBase64(svcCtx.Config.Salt, "123456"),
 		Name:     "超级管理员",
 		Auth:     models.SuperAdminAuth,
 	}

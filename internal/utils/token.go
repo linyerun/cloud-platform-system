@@ -1,13 +1,13 @@
 package utils
 
 import (
+	"cloud-platform-system/internal/models"
 	"crypto"
 	"crypto/hmac"
 	"encoding"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"reflect"
 	"strings"
 	"time"
 )
@@ -62,18 +62,18 @@ type TokenBinaryFormat interface {
 }
 
 type DefaultTokenObject struct {
-	Claims               any   `json:"claims"`
-	ExpireAtMilliseconds int64 `json:"expire_at_milliseconds"`
+	Claims               *models.User `json:"claims"`
+	ExpireAtMilliseconds int64        `json:"expire_at_milliseconds"`
 }
 
-func NewDefaultTokenObject(claims any, expireAtMilliseconds time.Duration) (obj *DefaultTokenObject, err error) {
+func NewDefaultTokenObject(claims *models.User, expireTime time.Duration) (obj *DefaultTokenObject, err error) {
 	// claim必须是指针，不然解码的时候就变成map了
-	if valueOf := reflect.ValueOf(claims); valueOf.Kind() != reflect.Pointer || valueOf.IsNil() {
+	if !IsNotNilPointer(claims) {
 		return nil, ErrTokenClaimInvalid
 	}
 	obj = new(DefaultTokenObject)
 	obj.Claims = claims
-	obj.ExpireAtMilliseconds = expireAtMilliseconds.Milliseconds() + time.Now().UnixMilli()
+	obj.ExpireAtMilliseconds = expireTime.Milliseconds() + time.Now().UnixMilli()
 	return
 }
 

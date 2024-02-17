@@ -38,7 +38,7 @@ func (l *CreateAdminLogic) CreateAdmin(req *types.CreateAdminRequest) (resp *typ
 	admin := &models.User{
 		Id:       utils.GetSnowFlakeIdAndBase64(),
 		Email:    req.Email,
-		Password: utils.DoHashAndBase64(l.svcCtx, req.Password),
+		Password: utils.DoHashAndBase64(l.svcCtx.Config.Salt, req.Password),
 		Name:     req.Name,
 		Auth:     models.AdminAuth,
 	}
@@ -48,7 +48,7 @@ func (l *CreateAdminLogic) CreateAdmin(req *types.CreateAdminRequest) (resp *typ
 		return &types.CommonResponse{Code: 500, Msg: err.Error()}, nil
 	}
 
-	// TODO: 发送登录成功信息到指定邮箱中
+	utils.SendTextByEmail(req.Email, "管理员账户生成成功通知", "名称: "+req.Name+"，密码: "+req.Password)
 
 	return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
 }

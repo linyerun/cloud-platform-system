@@ -24,6 +24,7 @@ config get requirepass
 
 auth password
 ```
+- 密码: redis
 
 ### MongoDB
 > 拉取镜像并启动
@@ -38,6 +39,7 @@ docker run -itd --name mongo -v /home/mongo/data:/data/db -p 27017:27017 mongo:4
 
 db.createUser({ user:'root',pwd:'root',roles:[ { role:'userAdminAnyDatabase', db: 'admin'},'readWriteAnyDatabase']});
 ```
+- 密码: root
 
 #### 设置唯一索引-email
 ![img.png](img01.png)

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/base64"
-	"encoding/binary"
 	"errors"
 	"sync"
 	"time"
@@ -48,7 +47,11 @@ func newSnowFlake(workerId uint16) (*snowflake, error) {
 	if workerId < 0 || workerId > workerMax {
 		return nil, errors.New("worker ID excess of quantity")
 	}
-	return &snowflake{timestamp: 0, seqId: 0, epoch: time.Now().UnixMilli(), workerId: workerId}, nil
+	time, err := time.Parse("2006-01-02 15:04:05", "2001-06-20 13:29:04")
+	if err != nil {
+		panic(err)
+	}
+	return &snowflake{timestamp: 0, seqId: 0, epoch: time.UnixMilli(), workerId: workerId}, nil
 }
 
 func (s *snowflake) getId() int64 {
@@ -74,7 +77,11 @@ func (s *snowflake) getId() int64 {
 
 func GetSnowFlakeIdAndBase64() string {
 	buf := make([]byte, 8)
-	binary.PutVarint(buf, GetSnowFlakeId())
+	id := GetSnowFlakeId()
+	for i := 7; i >= 0; i-- {
+		buf[i] = byte(id)
+		id >>= 8
+	}
 	return base64.URLEncoding.EncodeToString(buf)
 }
 
