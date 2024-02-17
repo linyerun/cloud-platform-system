@@ -9,9 +9,10 @@ const (
 )
 
 type User struct {
-	Id       string `bson:"_id,omitempty" json:"id,omitempty"`
-	Email    string `bson:"email,omitempty" json:"email,omitempty"`
-	Password string `bson:"password,omitempty" json:"password,omitempty"`
-	Name     string `bson:"name,omitempty" json:"name,omitempty"`
-	Auth     uint   `bson:"auth,omitempty" json:"auth,omitempty"` // 权限：0: 游客, 1: 用户, 2: 管理员, 3: 超级管理员
+	Id       string `bson:"_id" json:"id,omitempty"`
+	Email    string `bson:"email" json:"email,omitempty"`
+	Password string `bson:"password" json:"password,omitempty"`
+	Name     string `bson:"name" json:"name,omitempty"`
+	// Auth不能omitempty, 不然无法录入权限0了
+	Auth uint `bson:"auth" json:"auth,omitempty"` // 权限：0: 游客, 1: 用户, 2: 管理员, 3: 超级管理员
 }

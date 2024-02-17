@@ -8,7 +8,7 @@ const (
 )
 
 type ApplicationForm struct {
-	Id      string `bson:"_id,omitempty"`
+	Id      string `bson:"_id"`
 	UserId  string `bson:"user_id"`
 	AdminId string `bson:"admin_id"`
 	Status  uint   `bson:"status"`

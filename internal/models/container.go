@@ -1,6 +1,6 @@
 package models
 
 type Container struct {
-	Id     string `bson:"_id,omitempty"`
-	UserId string `bson:"user_id,omitempty"`
+	Id     string `bson:"_id"`
+	UserId string `bson:"user_id"`
 }
