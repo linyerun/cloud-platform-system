@@ -121,7 +121,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodPut,
-					Path:    "/visitor_to_user/:visitor_id",
+					Path:    "/visitor_to_user/:visitor_id/:status",
 					Handler: v3.VisitorToUserHandler(serverCtx),
 				},
 			}...,

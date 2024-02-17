@@ -12,15 +12,23 @@ import (
 )
 
 type ServiceContext struct {
-	Config      config.Config
+	// 项目配置
+	Config config.Config
+
+	// 数据库客户端
 	RedisClient *redis.Client
 	MongoClient *mongo.Client
-	CAPTCHA     string
-	JwtAuth     rest.Middleware
-	Visitor     rest.Middleware
-	User        rest.Middleware
-	Admin       rest.Middleware
-	Super       rest.Middleware
+
+	// 当常量用的值
+	CAPTCHA       string
+	ExceptionList string
+
+	// 中间件
+	JwtAuth rest.Middleware
+	Visitor rest.Middleware
+	User    rest.Middleware
+	Admin   rest.Middleware
+	Super   rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -48,14 +56,15 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 	// 初始化ServiceContext
 	return &ServiceContext{
-		Config:      c,
-		RedisClient: redisClient,
-		MongoClient: mongoClient,
-		CAPTCHA:     "Captcha:%v",
-		JwtAuth:     middleware.NewJwtAuthMiddleware().Handle,
-		Visitor:     middleware.NewVisitorMiddleware().Handle,
-		User:        middleware.NewUserMiddleware().Handle,
-		Admin:       middleware.NewAdminMiddleware().Handle,
-		Super:       middleware.NewSuperMiddleware().Handle,
+		Config:        c,
+		RedisClient:   redisClient,
+		MongoClient:   mongoClient,
+		CAPTCHA:       "Captcha:%v",
+		ExceptionList: "ExceptionJsonList",
+		JwtAuth:       middleware.NewJwtAuthMiddleware().Handle,
+		Visitor:       middleware.NewVisitorMiddleware().Handle,
+		User:          middleware.NewUserMiddleware().Handle,
+		Admin:         middleware.NewAdminMiddleware().Handle,
+		Super:         middleware.NewSuperMiddleware().Handle,
 	}
 }

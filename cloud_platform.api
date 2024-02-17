@@ -84,7 +84,7 @@ service cloud_platform {
 
 	// 处理游客身份转正申请
 	@handler VisitorToUser
-	put /visitor_to_user/:visitor_id (PutVisitorToUserRequest) returns (CommonResponse)
+	put /visitor_to_user/:visitor_id/:status (PutVisitorToUserRequest) returns (CommonResponse)
 
 	// 获取名下用户信息
 	@handler GetUsers
@@ -148,7 +148,9 @@ type (
 		Status uint `path:"status"`
 	}
 	PutVisitorToUserRequest {
-		VisitorId string `path:"visitor_id"`
+		VisitorId    string `path:"visitor_id"`
+		Status       uint   `path:"status"`
+		VisitorEmail string `json:"visitor_email"`
 	}
 	CreateAdminRequest {
 		Email    string `json:"email"`

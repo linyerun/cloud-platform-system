@@ -51,7 +51,9 @@ type ImagePullRequest struct {
 }
 
 type PutVisitorToUserRequest struct {
-	VisitorId string `path:"visitor_id"`
+	VisitorId    string `path:"visitor_id"`
+	Status       uint   `path:"status"`
+	VisitorEmail string `json:"visitor_email"`
 }
 
 type UserLoginRequest struct {
