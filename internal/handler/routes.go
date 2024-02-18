@@ -67,8 +67,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
-					Path:    "/user/image/list",
-					Handler: v2.UserGetImagesHandler(serverCtx),
+					Path:    "/user/linux/list",
+					Handler: v2.UserGetLinuxImagesHandler(serverCtx),
 				},
 			}...,
 		),
@@ -81,8 +81,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
-					Path:    "/admin/image/list",
-					Handler: v3.AdminGetImagesHandler(serverCtx),
+					Path:    "/admin/linux/list",
+					Handler: v3.AdminGetLinuxImagesHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,
@@ -101,13 +101,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodDelete,
-					Path:    "/image/del/:id",
-					Handler: v3.DeleteImageHandler(serverCtx),
+					Path:    "/linux/del/:id",
+					Handler: v3.DeleteLinuxImageHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
-					Path:    "/image/pull",
-					Handler: v3.PullImageHandler(serverCtx),
+					Path:    "/linux/pull",
+					Handler: v3.PullLinuxImageHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodDelete,

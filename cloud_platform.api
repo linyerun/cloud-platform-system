@@ -13,16 +13,16 @@ info (
 	group:  v0
 )
 service cloud_platform {
-	@handler Register // 注册
+	@handler Register // 注册(OK)
 	post /user/register (UserRegisterRequest) returns (CommonResponse)
 
-	@handler Login // 登录
+	@handler Login // 登录(OK)
 	post /user/login (UserLoginRequest) returns (CommonResponse)
 
-	@handler CaptchaPicture // 获取验证码图片
+	@handler CaptchaPicture // 获取验证码图片(OK)
 	get /user/captcha returns (CaptchaPictureResponse)
 
-	@handler CaptchaEmail // 发送验证码图片到邮箱
+	@handler CaptchaEmail // 发送验证码图片到邮箱(OK)
 	get /user/captcha/email (CaptchaEmailRequest) returns (CommonResponse)
 }
 
@@ -32,11 +32,11 @@ service cloud_platform {
 	middleware: JwtAuth,Visitor
 )
 service cloud_platform {
-	// 获取管理员列表，用于游客发送升级申请
+	// 获取管理员列表，用于游客发送升级申请(OK)
 	@handler GetAdmins
 	get /admin/all returns (CommonResponse)
 
-	// 向管理员申请转为user
+	// 向管理员申请转为user(OK)
 	@handler ToUser
 	post /to/user (ApplicationFormPostRequest) returns (CommonResponse)
 }
@@ -47,9 +47,9 @@ service cloud_platform {
 	middleware: JwtAuth,User // 校验: token有效, user的auth为0
 )
 service cloud_platform {
-	// 获取镜像列表
-	@handler UserGetImages
-	get /user/image/list returns (CommonResponse)
+	// 获取镜像列表(OK)
+	@handler UserGetLinuxImages
+	get /user/linux/list returns (CommonResponse)
 }
 
 @server (
@@ -58,19 +58,19 @@ service cloud_platform {
 	middleware: JwtAuth,Admin
 )
 service cloud_platform {
-	// 拉取镜像
-	@handler PullImage
-	post /image/pull (ImagePullRequest) returns (CommonResponse)
+	// 拉取镜像(OK)
+	@handler PullLinuxImage
+	post /linux/pull (ImagePullRequest) returns (CommonResponse)
 
-	// 删除镜像
-	@handler DeleteImage
-	delete /image/del/:id (ImageDelRequest) returns (CommonResponse)
+	// 删除镜像(OK)
+	@handler DeleteLinuxImage
+	delete /linux/del/:id (ImageDelRequest) returns (CommonResponse)
 
-	// 获取镜像列表
-	@handler AdminGetImages
-	get /admin/image/list returns (CommonResponse)
+	// 获取镜像列表(OK)
+	@handler AdminGetLinuxImages
+	get /admin/linux/list returns (CommonResponse)
 
-	// 查看自己管理用户的容器列表
+	// 查看自己管理的用户的容器列表
 	@handler GetContainerList
 	get /container/list returns (CommonResponse)
 
@@ -78,11 +78,11 @@ service cloud_platform {
 	@handler DeleteContainer
 	delete /container/:id (DeleteContainerRequest) returns (CommonResponse)
 
-	// 获取不同状态申请单列表
+	// 获取不同状态申请单列表(OK)
 	@handler GetFormByStatus
 	get /application_forms/:status (GetFormByStatusRequest) returns (CommonResponse)
 
-	// 处理游客身份转正申请
+	// 处理游客身份转正申请(OK)
 	@handler VisitorToUser
 	put /visitor_to_user/:visitor_id/:status (PutVisitorToUserRequest) returns (CommonResponse)
 
@@ -101,6 +101,7 @@ service cloud_platform {
 	middleware: JwtAuth,Super
 )
 service cloud_platform {
+	// 创建管理员(OK)
 	@handler CreateAdmin
 	post /create_admin (CreateAdminRequest) returns (CommonResponse)
 }
@@ -111,7 +112,7 @@ service cloud_platform {
 	middleware: JwtAuth
 )
 service cloud_platform {
-	// 刷新token
+	// 刷新token(OK)
 	@handler RefreshToken
 	put /token/refresh returns (CommonResponse)
 }

@@ -8,10 +8,10 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func UserGetImagesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func UserGetLinuxImagesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		l := v2.NewUserGetImagesLogic(r.Context(), svcCtx)
-		resp, err := l.UserGetImages()
+		l := v2.NewUserGetLinuxImagesLogic(r.Context(), svcCtx)
+		resp, err := l.UserGetLinuxImages()
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

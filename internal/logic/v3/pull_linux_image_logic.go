@@ -3,41 +3,43 @@ package v3
 import (
 	"cloud-platform-system/internal/common"
 	"cloud-platform-system/internal/models"
-	"cloud-platform-system/internal/svc"
-	"cloud-platform-system/internal/types"
 	"cloud-platform-system/internal/utils"
 	"context"
 	"fmt"
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/core/logx"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
+
+	"cloud-platform-system/internal/svc"
+	"cloud-platform-system/internal/types"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type PullImageLogic struct {
+type PullLinuxImageLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewPullImageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PullImageLogic {
-	return &PullImageLogic{
+func NewPullLinuxImageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PullLinuxImageLogic {
+	return &PullLinuxImageLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *PullImageLogic) PullImage(req *types.ImagePullRequest) (resp *types.CommonResponse, err error) {
+func (l *PullLinuxImageLogic) PullLinuxImage(req *types.ImagePullRequest) (resp *types.CommonResponse, err error) {
 	// 必须指明版本
 	if req.ImageTag == "latest" {
 		return &types.CommonResponse{Code: 400, Msg: "必须只能具体版本，不能使用latest作为版本号"}, nil
 	}
 
 	// 避免重复拉取镜像
-	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ImageDocument).FindOne(l.ctx, bson.D{{"name", req.ImageName}, {"tag", req.ImageTag}}).Err()
+	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOne(l.ctx, bson.D{{"name", req.ImageName}, {"tag", req.ImageTag}}).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(errors.Wrap(err, "find data in mongo error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
@@ -79,7 +81,7 @@ func (l *PullImageLogic) PullImage(req *types.ImagePullRequest) (resp *types.Com
 		}
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
-	image := &models.Image{
+	image := &models.LinuxImage{
 		Id:        utils.GetSnowFlakeIdAndBase64(),
 		CreatorId: l.ctx.Value("user").(*models.User).Id,
 		Name:      req.ImageName,
@@ -87,7 +89,7 @@ func (l *PullImageLogic) PullImage(req *types.ImagePullRequest) (resp *types.Com
 		ImageId:   dockerImage.ID,
 		Size:      dockerImage.Size,
 	}
-	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ImageDocument).InsertOne(l.ctx, image)
+	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).InsertOne(l.ctx, image)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "save image msg to mongo error"))
 		if err = l.svcCtx.DockerClient.RemoveImage(req.ImageName + ":" + req.ImageTag); err != nil {

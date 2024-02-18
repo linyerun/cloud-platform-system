@@ -1,8 +1,8 @@
 package models
 
-const ImageDocument = "images"
+const LinuxImageDocument = "linux_images"
 
-type Image struct {
+type LinuxImage struct {
 	Id        string `bson:"_id"`
 	CreatorId string `bson:"creator_id"`
 	Name      string `bson:"name"`

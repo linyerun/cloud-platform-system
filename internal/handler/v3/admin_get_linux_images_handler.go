@@ -5,20 +5,13 @@ import (
 
 	"cloud-platform-system/internal/logic/v3"
 	"cloud-platform-system/internal/svc"
-	"cloud-platform-system/internal/types"
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func DeleteImageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func AdminGetLinuxImagesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.ImageDelRequest
-		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-			return
-		}
-
-		l := v3.NewDeleteImageLogic(r.Context(), svcCtx)
-		resp, err := l.DeleteImage(&req)
+		l := v3.NewAdminGetLinuxImagesLogic(r.Context(), svcCtx)
+		resp, err := l.AdminGetLinuxImages()
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

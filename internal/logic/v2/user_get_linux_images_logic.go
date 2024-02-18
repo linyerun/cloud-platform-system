@@ -10,20 +10,20 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type UserGetImagesLogic struct {
+type UserGetLinuxImagesLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewUserGetImagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserGetImagesLogic {
-	return &UserGetImagesLogic{
+func NewUserGetLinuxImagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserGetLinuxImagesLogic {
+	return &UserGetLinuxImagesLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *UserGetImagesLogic) UserGetImages() (resp *types.CommonResponse, err error) {
+func (l *UserGetLinuxImagesLogic) UserGetLinuxImages() (resp *types.CommonResponse, err error) {
 	return common.GetAllImage(l.svcCtx, l.Logger, l.ctx)
 }

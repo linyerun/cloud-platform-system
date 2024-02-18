@@ -3,42 +3,44 @@ package v3
 import (
 	"cloud-platform-system/internal/common"
 	"cloud-platform-system/internal/models"
-	"cloud-platform-system/internal/svc"
-	"cloud-platform-system/internal/types"
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/core/logx"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
+
+	"cloud-platform-system/internal/svc"
+	"cloud-platform-system/internal/types"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type DeleteImageLogic struct {
+type DeleteLinuxImageLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewDeleteImageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteImageLogic {
-	return &DeleteImageLogic{
+func NewDeleteLinuxImageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteLinuxImageLogic {
+	return &DeleteLinuxImageLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *DeleteImageLogic) DeleteImage(req *types.ImageDelRequest) (resp *types.CommonResponse, err error) {
+func (l *DeleteLinuxImageLogic) DeleteLinuxImage(req *types.ImageDelRequest) (resp *types.CommonResponse, err error) {
 	// 根据Id获取镜像信息
-	res := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ImageDocument).FindOne(l.ctx, bson.D{{"_id", req.Id}}, options.FindOne().SetProjection(bson.D{{"image_id", 1}}))
+	res := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOne(l.ctx, bson.D{{"_id", req.Id}}, options.FindOne().SetProjection(bson.D{{"image_id", 1}}))
 	if err = res.Err(); err == mongo.ErrNoDocuments {
 		return &types.CommonResponse{Code: 400, Msg: "不存在此镜像"}, nil
 	} else if err != nil {
 		l.Logger.Error(errors.Wrap(err, "get image msg in mongo error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
-	var dockerImage = new(models.Image) // 只有ImageId有数据
+	var dockerImage = new(models.LinuxImage) // 只有ImageId有数据
 	err = res.Decode(dockerImage)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "decode mongo data error"))
@@ -74,12 +76,12 @@ func (l *DeleteImageLogic) DeleteImage(req *types.ImageDelRequest) (resp *types.
 	err = common.DelData(l.Logger, l.svcCtx, func() (any, error) {
 		// 真出现异常了，我们可以根据删除日志恢复镜像
 		filter := bson.D{{"_id", req.Id}}
-		res = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ImageDocument).FindOneAndDelete(l.ctx, filter)
+		res = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOneAndDelete(l.ctx, filter)
 		if err = res.Err(); err != nil {
 			l.Logger.Error(errors.Wrap(err, "get and del mongo data error"))
 			return nil, err
 		}
-		dockerImage = new(models.Image)
+		dockerImage = new(models.LinuxImage)
 		if err = res.Decode(dockerImage); err != nil {
 			l.Logger.Error(errors.Wrap(err, "get and del mongo data error"))
 			return nil, err

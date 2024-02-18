@@ -9,7 +9,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func PullImageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func PullLinuxImageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ImagePullRequest
 		if err := httpx.Parse(r, &req); err != nil {
@@ -17,8 +17,8 @@ func PullImageHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := v3.NewPullImageLogic(r.Context(), svcCtx)
-		resp, err := l.PullImage(&req)
+		l := v3.NewPullLinuxImageLogic(r.Context(), svcCtx)
+		resp, err := l.PullLinuxImage(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

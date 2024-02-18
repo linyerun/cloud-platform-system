@@ -13,7 +13,7 @@ import (
 
 func GetAllImage(svcCtx *svc.ServiceContext, Logger logx.Logger, ctx context.Context) (*types.CommonResponse, error) {
 	// 获取镜像
-	cur, err := svcCtx.MongoClient.Database(svcCtx.Config.Mongo.DbName).Collection(models.ImageDocument).Find(ctx, bson.D{})
+	cur, err := svcCtx.MongoClient.Database(svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).Find(ctx, bson.D{})
 	if err != nil {
 		Logger.Error(errors.Wrap(err, "find images error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
@@ -32,7 +32,7 @@ func GetAllImage(svcCtx *svc.ServiceContext, Logger logx.Logger, ctx context.Con
 
 	for cur.Next(ctx) {
 		// 解析image数据
-		image := new(models.Image)
+		image := new(models.LinuxImage)
 		if err = cur.Decode(image); err != nil {
 			Logger.Error(errors.Wrap(err, "decode images error"))
 			return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
