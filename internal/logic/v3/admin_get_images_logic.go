@@ -1,11 +1,10 @@
 package v3
 
 import (
-	"context"
-
+	"cloud-platform-system/internal/common"
 	"cloud-platform-system/internal/svc"
 	"cloud-platform-system/internal/types"
-
+	"context"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -24,7 +23,5 @@ func NewAdminGetImagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ad
 }
 
 func (l *AdminGetImagesLogic) AdminGetImages() (resp *types.CommonResponse, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	return common.GetAllImage(l.svcCtx, l.Logger, l.ctx)
 }

@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"cloud-platform-system/internal/common"
 	"context"
 
 	"cloud-platform-system/internal/svc"
@@ -24,7 +25,5 @@ func NewUserGetImagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Use
 }
 
 func (l *UserGetImagesLogic) UserGetImages() (resp *types.CommonResponse, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+	return common.GetAllImage(l.svcCtx, l.Logger, l.ctx)
 }
