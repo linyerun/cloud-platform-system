@@ -64,7 +64,7 @@ service cloud_platform {
 
 	// 删除镜像
 	@handler DeleteImage
-	delete /image/del (ImageDelRequest) returns (CommonResponse)
+	delete /image/del/:id (ImageDelRequest) returns (CommonResponse)
 
 	// 获取镜像列表
 	@handler AdminGetImages
@@ -139,7 +139,7 @@ type (
 		ImageTag  string `json:"image_tag"`
 	}
 	ImageDelRequest {
-		ImageName string `json:"image_name"`
+		Id string `path:"id"`
 	}
 	ApplicationFormPostRequest {
 		AdminId    string `json:"admin_id"`

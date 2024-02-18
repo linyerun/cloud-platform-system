@@ -42,4 +42,10 @@ func main() {
 	//	fmt.Println(image.ID)
 	//	fmt.Println(image.Size)
 	//}
+
+	// 删除镜像
+	err = client.RemoveImage("sha256:5be4939875f7cdc771f11fb8c0737224da6d24e5e98023c511a5d1b4d1f94b04")
+	if err != nil {
+		panic(err)
+	}
 }

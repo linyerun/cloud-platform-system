@@ -43,7 +43,7 @@ type GetFormByStatusRequest struct {
 }
 
 type ImageDelRequest struct {
-	ImageName string `json:"image_name"`
+	Id string `path:"id"`
 }
 
 type ImagePullRequest struct {

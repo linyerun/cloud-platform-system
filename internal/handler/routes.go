@@ -101,7 +101,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodDelete,
-					Path:    "/image/del",
+					Path:    "/image/del/:id",
 					Handler: v3.DeleteImageHandler(serverCtx),
 				},
 				{
