@@ -48,6 +48,7 @@ type ImageDelRequest struct {
 
 type ImagePullRequest struct {
 	ImageName string `json:"image_name"`
+	ImageTag  string `json:"image_tag"`
 }
 
 type PutVisitorToUserRequest struct {
