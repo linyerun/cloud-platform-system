@@ -44,12 +44,14 @@ func WriteCaptchaImage(redisClient *redis.Client, CAPTCHA string, digits []byte,
 	return
 }
 
-func IsValidCaptcha(redisClient *redis.Client, CAPTCHA string, captchaStr string) bool {
-	err := redisClient.Del(context.Background(), fmt.Sprintf(CAPTCHA, captchaStr)).Err()
+func IsValidCaptcha(log logx.Logger, redisClient *redis.Client, CAPTCHA string, captchaStr string) bool {
+	err := redisClient.GetDel(context.Background(), fmt.Sprintf(CAPTCHA, captchaStr)).Err()
 	if err == nil {
 		return true
 	} else if err == redis.Nil {
 		return false
+	} else {
+		log.Error(err, errors.New("verify captcha error"))
 	}
 	return false
 }

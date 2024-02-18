@@ -4,6 +4,7 @@ import (
 	"cloud-platform-system/internal/common"
 	"context"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"testing"
 	"time"
 )
@@ -23,4 +24,15 @@ func TestSetNx(t *testing.T) {
 		fmt.Println(err)
 	}
 	fmt.Println("res:", result)
+}
+
+func TestGetDel(t *testing.T) {
+	err := svcCtx.RedisClient.GetDel(context.Background(), "test-get-del").Err()
+	if err == nil {
+		fmt.Println("删除成功")
+	} else if err == redis.Nil {
+		fmt.Println("获取失败")
+	} else {
+		t.Fatal(err)
+	}
 }

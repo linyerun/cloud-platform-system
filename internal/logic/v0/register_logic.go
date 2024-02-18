@@ -28,7 +28,7 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 
 func (l *RegisterLogic) Register(req *types.UserRegisterRequest) (resp *types.CommonResponse, err error) {
 	// 校验参数
-	if !utils.IsNormalEmail(req.Email) || len(req.Password) < 1 || len(req.Name) < 1 || !utils.IsValidCaptcha(l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, req.Captcha) {
+	if !utils.IsNormalEmail(req.Email) || len(req.Password) < 1 || len(req.Name) < 1 || !utils.IsValidCaptcha(l.Logger, l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, req.Captcha) {
 		return &types.CommonResponse{Code: 400, Msg: "参数有误"}, nil
 	}
 
