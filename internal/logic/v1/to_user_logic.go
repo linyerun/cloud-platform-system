@@ -31,7 +31,7 @@ func NewToUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ToUserLogi
 func (l *ToUserLogic) ToUser(req *types.ApplicationFormPostRequest) (resp *types.CommonResponse, err error) {
 	// 校验是否存在
 	filter := bson.D{{"_id", req.AdminId}, {"email", req.AdminEmail}}
-	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserTable).FindOne(l.ctx, filter).Err()
+	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).FindOne(l.ctx, filter).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(errors.Wrap(err, "search admin in mongo error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统错误"}, nil
@@ -42,7 +42,7 @@ func (l *ToUserLogic) ToUser(req *types.ApplicationFormPostRequest) (resp *types
 	// 校验是否重复申请
 	user := l.ctx.Value("user").(*models.User)
 	filter = bson.D{{"user_id", user.Id}, {"admin_id", req.AdminId}}
-	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormTable).FindOne(l.ctx, filter).Err()
+	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormDocument).FindOne(l.ctx, filter).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(errors.Wrap(err, "search admin in mongo error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统错误"}, nil
@@ -52,7 +52,7 @@ func (l *ToUserLogic) ToUser(req *types.ApplicationFormPostRequest) (resp *types
 
 	// 新增到文档当中
 	af := &models.ApplicationForm{Id: utils.GetSnowFlakeIdAndBase64(), UserId: user.Id, AdminId: req.AdminId, Status: models.ApplicationFormStatusIng}
-	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormTable).InsertOne(l.ctx, af)
+	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormDocument).InsertOne(l.ctx, af)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "insert application_form in mongo error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统错误"}, nil

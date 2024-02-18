@@ -42,7 +42,7 @@ func (l *RegisterLogic) Register(req *types.UserRegisterRequest) (resp *types.Co
 		Name:     req.Name,
 		Auth:     models.VisitorAuth,
 	}
-	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserTable).InsertOne(l.ctx, visitor)
+	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).InsertOne(l.ctx, visitor)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "insert user error, email is "+req.Email))
 		return &types.CommonResponse{Code: 500, Msg: err.Error()}, nil

@@ -36,7 +36,7 @@ func (l *LoginLogic) Login(req *types.UserLoginRequest) (resp *types.CommonRespo
 	// 查询具体信息
 	var user = new(models.User)
 	filter := bson.M{"email": req.Email, "password": utils.DoHashAndBase64(l.svcCtx.Config.Salt, req.Password)}
-	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserTable).FindOne(l.ctx, filter).Decode(user)
+	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).FindOne(l.ctx, filter).Decode(user)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "find user error, email is "+req.Email))
 		return &types.CommonResponse{Code: 500, Msg: err.Error()}, nil

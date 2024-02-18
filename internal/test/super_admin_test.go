@@ -28,7 +28,7 @@ func TestInsertSuperAdmin(t *testing.T) {
 		Name:     "超级管理员",
 		Auth:     models.SuperAdminAuth,
 	}
-	result, err := svcCtx.MongoClient.Database(svcCtx.Config.Mongo.DbName).Collection(models.UserTable).InsertOne(context.Background(), admin)
+	result, err := svcCtx.MongoClient.Database(svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).InsertOne(context.Background(), admin)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -42,7 +42,7 @@ func (l *CreateAdminLogic) CreateAdmin(req *types.CreateAdminRequest) (resp *typ
 		Name:     req.Name,
 		Auth:     models.AdminAuth,
 	}
-	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserTable).InsertOne(l.ctx, admin)
+	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).InsertOne(l.ctx, admin)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "insert user error, email is "+req.Email))
 		return &types.CommonResponse{Code: 500, Msg: err.Error()}, nil

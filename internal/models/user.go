@@ -2,7 +2,7 @@ package models
 
 // 插入的时候转uint, 目的是保证权限保存类型是Mongo的NumberLong
 const (
-	UserTable      = "users"
+	UserDocument   = "users"
 	VisitorAuth    = 0
 	UserAuth       = 1
 	AdminAuth      = 2

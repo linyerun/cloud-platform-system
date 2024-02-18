@@ -30,7 +30,7 @@ func NewGetAdminsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdmi
 func (l *GetAdminsLogic) GetAdmins() (resp *types.CommonResponse, err error) {
 	// 查询数据
 	filter := bson.D{{"auth", models.AdminAuth}}
-	cur, err := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserTable).Find(l.ctx, filter, options.Find().SetProjection(bson.M{"_id": 1, "email": 1, "name": 1}))
+	cur, err := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).Find(l.ctx, filter, options.Find().SetProjection(bson.M{"_id": 1, "email": 1, "name": 1}))
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "get admins from mongo error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统错误，获取数据失败"}, nil

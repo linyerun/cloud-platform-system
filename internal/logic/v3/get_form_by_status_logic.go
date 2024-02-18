@@ -36,7 +36,7 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 
 	// 查询
 	filter := bson.D{{"admin_id", admin.Id}, {"status", req.Status}}
-	cur, err := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormTable).Find(l.ctx, filter, options.Find().SetProjection(bson.D{{"user_id", 1}}))
+	cur, err := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormDocument).Find(l.ctx, filter, options.Find().SetProjection(bson.D{{"user_id", 1}}))
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "can not get application_form data err"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
@@ -61,7 +61,7 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 
 	// 获取user数据
 	filter = bson.D{{"_id", bson.M{"$in": ids}}}
-	cur, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserTable).Find(l.ctx, filter, options.Find().SetProjection(bson.D{{"password", 0}, {"auth", 0}}))
+	cur, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).Find(l.ctx, filter, options.Find().SetProjection(bson.D{{"password", 0}, {"auth", 0}}))
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "can not get users data err"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil

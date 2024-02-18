@@ -5,7 +5,7 @@ const (
 	ApplicationFormStatusIng    = 0
 	ApplicationFormStatusOk     = 1
 	ApplicationFormStatusReject = 2
-	ApplicationFormTable        = "application_forms"
+	ApplicationFormDocument     = "application_forms"
 )
 
 type ApplicationForm struct {

@@ -37,7 +37,7 @@ func (l *VisitorToUserLogic) VisitorToUser(req *types.PutVisitorToUserRequest) (
 	// 验证是否存在这个申请, 存在则改正
 	admin := l.ctx.Value("user").(*models.User)
 	filterForm := bson.D{{"admin_id", admin.Id}, {"user_id", req.VisitorId}, {"status", models.ApplicationFormStatusIng}}
-	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormTable).FindOneAndUpdate(l.ctx, filterForm, bson.D{{"$set", bson.M{"status": req.Status}}}).Err()
+	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormDocument).FindOneAndUpdate(l.ctx, filterForm, bson.D{{"$set", bson.M{"status": req.Status}}}).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(errors.Wrap(err, "find and modify application_forms err"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
@@ -49,13 +49,13 @@ func (l *VisitorToUserLogic) VisitorToUser(req *types.PutVisitorToUserRequest) (
 	if req.Status == models.ApplicationFormStatusOk {
 		// 改变user的auth
 		filterUser := bson.D{{"_id", req.VisitorId}, {"email", req.VisitorEmail}}
-		_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserTable).UpdateOne(l.ctx, filterUser, bson.D{{"$set", bson.M{"auth": uint(models.UserAuth)}}})
+		_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).UpdateOne(l.ctx, filterUser, bson.D{{"$set", bson.M{"auth": uint(models.UserAuth)}}})
 		if err != nil {
 			l.Logger.Error(errors.Wrap(err, "modify user err"))
 			// 最大程度自救, 大概率不会用上的
 			filterForm = bson.D{{"admin_id", admin.Id}, {"user_id", req.VisitorId}, {"status", req.Status}}
 			for i := 0; i < 3; i++ {
-				err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormTable).FindOneAndUpdate(l.ctx, filterForm, bson.D{{"$set", bson.M{"status": models.ApplicationFormStatusIng}}}).Err()
+				err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormDocument).FindOneAndUpdate(l.ctx, filterForm, bson.D{{"$set", bson.M{"status": models.ApplicationFormStatusIng}}}).Err()
 				if err != nil {
 					l.Logger.Error(errors.Wrap(err, "find and modify application_forms err"))
 					time.Sleep(time.Millisecond * 50)
