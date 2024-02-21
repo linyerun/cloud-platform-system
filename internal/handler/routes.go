@@ -66,6 +66,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.JwtAuth, serverCtx.User},
 			[]rest.Route{
 				{
+					Method:  http.MethodPost,
+					Path:    "/user/apply/linux",
+					Handler: v2.LinuxStartApplyHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
 					Path:    "/user/linux/list",
 					Handler: v2.UserGetLinuxImagesHandler(serverCtx),

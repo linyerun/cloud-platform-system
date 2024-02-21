@@ -29,3 +29,6 @@ Redis:
 
 Jwt:
   ExpireSec: 1800
+
+Pprof:
+  Port: 9999

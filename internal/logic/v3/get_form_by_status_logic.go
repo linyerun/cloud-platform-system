@@ -30,23 +30,25 @@ func NewGetFormByStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest) (resp *types.CommonResponse, err error) {
 	admin := l.ctx.Value("user").(*models.User)
 	// 校验status的范围
-	if req.Status != models.ApplicationFormStatusIng && req.Status != models.ApplicationFormStatusOk && req.Status != models.ApplicationFormStatusReject {
+	if req.Status != models.UserApplicationFormStatusIng && req.Status != models.UserApplicationFormStatusOk && req.Status != models.UserApplicationFormStatusReject {
 		return &types.CommonResponse{Code: 400, Msg: "status值错误"}, nil
 	}
 
 	// 查询
 	filter := bson.D{{"admin_id", admin.Id}, {"status", req.Status}}
-	cur, err := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormDocument).Find(l.ctx, filter, options.Find().SetProjection(bson.D{{"user_id", 1}}))
+	cur, err := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserApplicationFormDocument).Find(l.ctx, filter, options.Find().SetProjection(bson.D{{"user_id", 1}, {"explanation", 1}}))
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "can not get application_form data err"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
 	defer cur.Close(l.ctx)
 	var ids []string
+	var idToExplanation = make(map[string]string)
 	for cur.Next(l.ctx) {
 		// 单个字段也不可以直接使用基础类型来进行解析
 		type Tmp struct {
-			Id string `bson:"user_id"`
+			Id          string `bson:"user_id"`
+			Explanation string `bson:"explanation"`
 		}
 		tmp := new(Tmp)
 		if err = cur.Decode(tmp); err != nil {
@@ -54,6 +56,7 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 			return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 		}
 		ids = append(ids, tmp.Id)
+		idToExplanation[tmp.Id] = tmp.Explanation
 	}
 	if len(ids) == 0 {
 		return &types.CommonResponse{Code: 200, Msg: "获取成功"}, nil
@@ -68,9 +71,10 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 	}
 	defer cur.Close(l.ctx)
 	type UserData struct {
-		Id    string `bson:"_id" json:"id,omitempty"`
-		Email string `bson:"email" json:"email,omitempty"`
-		Name  string `bson:"name" json:"name,omitempty"`
+		Id          string `bson:"_id" json:"id,omitempty"`
+		Email       string `bson:"email" json:"email,omitempty"`
+		Name        string `bson:"name" json:"name,omitempty"`
+		Explanation string `bson:"explanation,omitempty" json:"explanation,omitempty"`
 	}
 	var users []*UserData
 	for cur.Next(l.ctx) {
@@ -79,6 +83,7 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 			l.Logger.Error(errors.Wrap(err, "decode mongo data error"))
 			return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 		}
+		user.Explanation = idToExplanation[user.Id]
 		users = append(users, user)
 	}
 	return &types.CommonResponse{Code: 200, Msg: "获取成功", Data: map[string]any{"users": users}}, nil

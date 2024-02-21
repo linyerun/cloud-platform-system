@@ -30,14 +30,14 @@ func NewVisitorToUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Vis
 
 func (l *VisitorToUserLogic) VisitorToUser(req *types.PutVisitorToUserRequest) (resp *types.CommonResponse, err error) {
 	// 校验status值
-	if req.Status != models.ApplicationFormStatusOk && req.Status != models.ApplicationFormStatusReject {
+	if req.Status != models.UserApplicationFormStatusOk && req.Status != models.UserApplicationFormStatusReject {
 		return &types.CommonResponse{Code: 400, Msg: "status参数有误"}, nil
 	}
 
 	// 验证是否存在这个申请, 存在则改正
 	admin := l.ctx.Value("user").(*models.User)
-	filterForm := bson.D{{"admin_id", admin.Id}, {"user_id", req.VisitorId}, {"status", models.ApplicationFormStatusIng}}
-	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormDocument).FindOneAndUpdate(l.ctx, filterForm, bson.D{{"$set", bson.M{"status": req.Status}}}).Err()
+	filterForm := bson.D{{"admin_id", admin.Id}, {"user_id", req.VisitorId}, {"status", models.UserApplicationFormStatusIng}}
+	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserApplicationFormDocument).FindOneAndUpdate(l.ctx, filterForm, bson.D{{"$set", bson.M{"status": req.Status}}}).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(errors.Wrap(err, "find and modify application_forms err"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
@@ -46,7 +46,7 @@ func (l *VisitorToUserLogic) VisitorToUser(req *types.PutVisitorToUserRequest) (
 	}
 
 	// 如果是拒绝则不需要执行修改user的auth操作, 同意才需要执行
-	if req.Status == models.ApplicationFormStatusOk {
+	if req.Status == models.UserApplicationFormStatusOk {
 		// 改变user的auth
 		filterUser := bson.D{{"_id", req.VisitorId}, {"email", req.VisitorEmail}}
 		_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).UpdateOne(l.ctx, filterUser, bson.D{{"$set", bson.M{"auth": uint(models.UserAuth)}}})
@@ -55,7 +55,7 @@ func (l *VisitorToUserLogic) VisitorToUser(req *types.PutVisitorToUserRequest) (
 			// 最大程度自救, 大概率不会用上的
 			filterForm = bson.D{{"admin_id", admin.Id}, {"user_id", req.VisitorId}, {"status", req.Status}}
 			for i := 0; i < 3; i++ {
-				err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.ApplicationFormDocument).FindOneAndUpdate(l.ctx, filterForm, bson.D{{"$set", bson.M{"status": models.ApplicationFormStatusIng}}}).Err()
+				err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserApplicationFormDocument).FindOneAndUpdate(l.ctx, filterForm, bson.D{{"$set", bson.M{"status": models.UserApplicationFormStatusIng}}}).Err()
 				if err != nil {
 					l.Logger.Error(errors.Wrap(err, "find and modify application_forms err"))
 					time.Sleep(time.Millisecond * 50)
@@ -73,7 +73,7 @@ func (l *VisitorToUserLogic) VisitorToUser(req *types.PutVisitorToUserRequest) (
 
 	// 发送通知给user
 	var ret string
-	if req.Status == models.ApplicationFormStatusOk {
+	if req.Status == models.UserApplicationFormStatusOk {
 		ret = "管理员通过了您的申请，您现在的身份由游客转为团队用户了。"
 	} else {
 		ret = "管理员拒绝了您的申请，您现在的身份依旧是游客。"

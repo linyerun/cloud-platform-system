@@ -50,7 +50,10 @@ service cloud_platform {
 	// 获取镜像列表(OK)
 	@handler UserGetLinuxImages
 	get /user/linux/list returns (CommonResponse)
-// 提交Linux容器开通申请
+
+	// 提交Linux容器开通申请
+	@handler LinuxStartApply
+	post /user/apply/linux (LinuxStartApplyRequest) returns (CommonResponse)
 // 关闭/开启/重启容器
 // 获取自己容器列表
 }
@@ -73,14 +76,6 @@ service cloud_platform {
 	@handler AdminGetLinuxImages
 	get /admin/linux/list returns (CommonResponse)
 
-	// 查看自己管理的用户的容器列表
-	@handler GetContainerList
-	get /container/list returns (CommonResponse)
-
-	// 删除管理用户的容器
-	@handler DeleteContainer
-	delete /container/:id (DeleteContainerRequest) returns (CommonResponse)
-
 	// 获取不同状态申请单列表(OK)
 	@handler GetFormByStatus
 	get /application_forms/:status (GetFormByStatusRequest) returns (CommonResponse)
@@ -88,6 +83,14 @@ service cloud_platform {
 	// 处理游客身份转正申请(OK)
 	@handler VisitorToUser
 	put /visitor_to_user/:visitor_id/:status (PutVisitorToUserRequest) returns (CommonResponse)
+
+	// 查看自己管理的用户的容器列表
+	@handler GetContainerList
+	get /container/list returns (CommonResponse)
+
+	// 删除管理用户的容器
+	@handler DeleteContainer
+	delete /container/:id (DeleteContainerRequest) returns (CommonResponse)
 
 	// 获取名下用户信息(暂时不用, 可以借鉴GetFormByStatus代码)
 	@handler GetUsers
@@ -148,8 +151,9 @@ type (
 		Id string `path:"id"`
 	}
 	ApplicationFormPostRequest {
-		AdminId    string `json:"admin_id"`
-		AdminEmail string `json:"admin_email"`
+		AdminId     string `json:"admin_id"`
+		AdminEmail  string `json:"admin_email"`
+		Explaintion string `json:"explaintion"`
 	}
 	GetApplicationFormByStatusRequest {
 		Status uint `path:"status"`
@@ -172,6 +176,10 @@ type (
 	}
 	GetFormByStatusRequest {
 		Status uint `path:"status"`
+	}
+	LinuxStartApplyRequest {
+		ImageId     string  `json:"image_id"`
+		ExportPorts []int64 `json:"export_ports"`
 	}
 	CommonResponse {
 		Code int         `json:"code"`

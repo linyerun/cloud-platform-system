@@ -2,8 +2,9 @@
 package types
 
 type ApplicationFormPostRequest struct {
-	AdminId    string `json:"admin_id"`
-	AdminEmail string `json:"admin_email"`
+	AdminId     string `json:"admin_id"`
+	AdminEmail  string `json:"admin_email"`
+	Explaintion string `json:"explaintion"`
 }
 
 type CaptchaEmailRequest struct {
@@ -51,6 +52,11 @@ type ImagePullRequest struct {
 	ImageTag             string   `json:"image_tag"`
 	ImageEnabledCommands []string `json:"image_enabled_commands"`
 	ImageMustExportPorts []int64  `json:"image_must_export_ports"`
+}
+
+type LinuxStartApplyRequest struct {
+	ImageId     string  `json:"image_id"`
+	ExportPorts []int64 `json:"export_ports"`
 }
 
 type PutVisitorToUserRequest struct {

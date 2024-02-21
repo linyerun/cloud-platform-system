@@ -28,9 +28,10 @@ type ServiceContext struct {
 	DockerClient *docker.Client
 
 	// 当常量用的值
-	CAPTCHA       string
-	ExceptionList string
-	ImagePrefix   string
+	CAPTCHA           string
+	ExceptionList     string
+	ImagePrefix       string
+	LinuxImageRunArgs []string
 
 	// 中间件
 	JwtAuth rest.Middleware
@@ -81,9 +82,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		MongoClient:  mongoClient,
 		DockerClient: client,
 
-		CAPTCHA:       "Captcha:%v",
-		ExceptionList: "ExceptionJsonList",
-		ImagePrefix:   "image_%v",
+		CAPTCHA:           "Captcha:%v",
+		ExceptionList:     "ExceptionJsonList",
+		ImagePrefix:       "image_%v",
+		LinuxImageRunArgs: []string{"--privileged=true", "-itd"},
 
 		JwtAuth: middleware.NewJwtAuthMiddleware().Handle,
 		Visitor: middleware.NewVisitorMiddleware().Handle,

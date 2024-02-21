@@ -27,4 +27,7 @@ type Config struct {
 	Jwt struct {
 		ExpireSec int64
 	}
+	Pprof struct {
+		Port int
+	}
 }
