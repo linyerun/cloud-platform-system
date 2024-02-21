@@ -17,8 +17,8 @@ const (
 )
 
 var (
-	once       = new(sync.Once)
-	snowFlaker *snowflake
+	once         = new(sync.Once)
+	snowFlakeObj *snowflake
 )
 
 // 雪花ID的组成(有最高位到最低位):
@@ -91,7 +91,7 @@ func GetSnowFlakeId() int64 {
 		if err != nil {
 			panic(err)
 		}
-		snowFlaker = flake
+		snowFlakeObj = flake
 	})
-	return snowFlaker.getId()
+	return snowFlakeObj.getId()
 }

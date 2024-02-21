@@ -50,6 +50,9 @@ service cloud_platform {
 	// 获取镜像列表(OK)
 	@handler UserGetLinuxImages
 	get /user/linux/list returns (CommonResponse)
+// 提交Linux容器开通申请
+// 关闭/开启/重启容器
+// 获取自己容器列表
 }
 
 @server (
@@ -136,8 +139,10 @@ type (
 		Email string `form:"email"`
 	}
 	ImagePullRequest {
-		ImageName string `json:"image_name"`
-		ImageTag  string `json:"image_tag"`
+		ImageName            string   `json:"image_name"`
+		ImageTag             string   `json:"image_tag"`
+		ImageEnabledCommands []string `json:"image_enabled_commands"`
+		ImageMustExportPorts []int64  `json:"image_must_export_ports"`
 	}
 	ImageDelRequest {
 		Id string `path:"id"`

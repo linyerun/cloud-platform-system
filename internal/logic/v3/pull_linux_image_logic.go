@@ -38,6 +38,13 @@ func (l *PullLinuxImageLogic) PullLinuxImage(req *types.ImagePullRequest) (resp 
 		return &types.CommonResponse{Code: 400, Msg: "必须只能具体版本，不能使用latest作为版本号"}, nil
 	}
 
+	// 端口必须在[0, 65535]这个范围
+	for _, port := range req.ImageMustExportPorts {
+		if port < 0 || port > 65535 {
+			return &types.CommonResponse{Code: 400, Msg: "每个端口范围必须在[0, 65535]里面"}, nil
+		}
+	}
+
 	// 避免重复拉取镜像
 	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOne(l.ctx, bson.D{{"name", req.ImageName}, {"tag", req.ImageTag}}).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
@@ -82,12 +89,14 @@ func (l *PullLinuxImageLogic) PullLinuxImage(req *types.ImagePullRequest) (resp 
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
 	image := &models.LinuxImage{
-		Id:        utils.GetSnowFlakeIdAndBase64(),
-		CreatorId: l.ctx.Value("user").(*models.User).Id,
-		Name:      req.ImageName,
-		Tag:       req.ImageTag,
-		ImageId:   dockerImage.ID,
-		Size:      dockerImage.Size,
+		Id:              utils.GetSnowFlakeIdAndBase64(),
+		CreatorId:       l.ctx.Value("user").(*models.User).Id,
+		Name:            req.ImageName,
+		Tag:             req.ImageTag,
+		ImageId:         dockerImage.ID,
+		Size:            dockerImage.Size,
+		EnableCommands:  req.ImageEnabledCommands,
+		MustExportPorts: req.ImageMustExportPorts,
 	}
 	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).InsertOne(l.ctx, image)
 	if err != nil {

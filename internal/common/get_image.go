@@ -21,12 +21,14 @@ func GetAllImage(svcCtx *svc.ServiceContext, Logger logx.Logger, ctx context.Con
 
 	var creators = make(map[string]*models.User) // key: admin_id, value: admin
 	type ImageDto struct {
-		Id      string       `json:"id"`
-		Creator *models.User `json:"creator"`
-		Name    string       `json:"name"`
-		Tag     string       `json:"tag"`
-		ImageId string       `json:"image_id"`
-		Size    int64        `json:"size"`
+		Id              string       `json:"id"`
+		Creator         *models.User `json:"creator"`
+		Name            string       `json:"name"`
+		Tag             string       `json:"tag"`
+		ImageId         string       `json:"image_id"`
+		Size            int64        `json:"size"`
+		EnableCommands  []string     `json:"enable_commands"`
+		MustExportPorts []int64      `json:"must_export_ports"`
 	}
 	var respData []*ImageDto
 
@@ -51,7 +53,7 @@ func GetAllImage(svcCtx *svc.ServiceContext, Logger logx.Logger, ctx context.Con
 			}
 			creators[user.Id] = user
 		}
-		respData = append(respData, &ImageDto{Id: image.Id, ImageId: image.ImageId, Name: image.Name, Tag: image.Tag, Size: image.Size, Creator: creators[image.CreatorId]})
+		respData = append(respData, &ImageDto{Id: image.Id, ImageId: image.ImageId, Name: image.Name, Tag: image.Tag, Size: image.Size, Creator: creators[image.CreatorId], EnableCommands: image.EnableCommands, MustExportPorts: image.MustExportPorts})
 	}
 
 	// 返回结果

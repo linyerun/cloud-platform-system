@@ -1,0 +1,6 @@
+FROM debian:latest
+LABEL maintainer="SuiFeng <suifeng.leaf@qq.com>"
+
+RUN apt update && apt upgrade && apt install -y openssh-server vim net-tools sudo systemd systemctl  && echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+
+CMD ["systemctl start sshd && bash"]

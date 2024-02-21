@@ -47,8 +47,10 @@ type ImageDelRequest struct {
 }
 
 type ImagePullRequest struct {
-	ImageName string `json:"image_name"`
-	ImageTag  string `json:"image_tag"`
+	ImageName            string   `json:"image_name"`
+	ImageTag             string   `json:"image_tag"`
+	ImageEnabledCommands []string `json:"image_enabled_commands"`
+	ImageMustExportPorts []int64  `json:"image_must_export_ports"`
 }
 
 type PutVisitorToUserRequest struct {

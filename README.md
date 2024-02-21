@@ -1,11 +1,26 @@
 # cloud platform system 后端
 ## 虚拟Linux
 ### centos虚拟
+#### 指令
 ```shell
 docker pull registry.cn-shanghai.aliyuncs.com/yore/bigdata:7.8.2003_v1
 
 docker run --privileged=true --cap-add SYS_ADMIN -e container=docker -it -p 10022:22 -p 10080:80 -d --name c1 db0f979c4417 /usr/sbin/init
 ```
+
+> 新版本: registry.cn-hangzhou.aliyuncs.com/lyr_public/centos7:2.0
+- 运行指令: `docker run --privileged=true -d -p 10022:22 -p 10080:80 --name c1 registry.cn-hangzhou.aliyuncs.com/lyr_public/centos7:2.0`
+- 账户：root，密码：root
+
+#### 端口说明
+- Linux的端口范围: 0-65535
+- 留给服务器自己使用的端口范围: 0-9999
+- 给用户部署项目/开启数据库使用的端口：10000开始
+- 给Linux虚拟服务器分配端口：从65535往左边靠近来使用，每次分配10个端口
+
+### debian
+- 下载东西：https://blog.csdn.net/u012285295/article/details/134308940
+- 配置ssh：https://blog.csdn.net/future_ai/article/details/81701744
 
 ## 数据库
 ### redis
@@ -50,8 +65,37 @@ db.createUser({ user:'root',pwd:'root',roles:[ { role:'userAdminAnyDatabase', db
    后面: 自定义分解int64算法保存到byte数组中
 2) Token生成和解析出现问题--2024-02-17T00:47:34.123+08:00    error  (/v5/token/refresh - 127.0.0.1:7608) illegal base64 data at input byte 16
    原因: aes加密如果key是16B，那么每次只能对称加密一个16B的块
+3) debian执行`apt update`失败，解决方法是更改时区并修改时间。https://blog.csdn.net/weixin_45663954/article/details/123394680
+
+### 修理debian
+1) debian执行`apt update`失败，解决方法是更改时区并修改时间。https://blog.csdn.net/weixin_45663954/article/details/123394680
+2) 修改镜像源
+   1. apt install apt-transport-https ca-certificates
+   2. 配合docker cp和本身的mv指令完成镜像源的修改
+   3. 执行`apt-get update && apt update`
+   4. 安装 `apt-get install -y vim`
+```text
+# 默认注释了源码镜像以提高 apt update 速度
+# 清华大学的软件源
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye main contrib non-free 
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye main contrib non-free 
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye-updates main contrib non-free 
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye-updates main contrib non-free 
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye-backports main contrib non-free 
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye-backports main contrib non-free 
+deb https://mirrors.tuna.tsinghua.edu.cn/debian-security bullseye-security main contrib non-free 
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian-security bullseye-security main contrib non-free
+```
+## ubuntu
+
+### 无法连接上ssh
+
+- 使用了`systemctl start sshd && ufw disable`还是不行
+  1.  `vim /etc/ssh/ssh_config`
+  2. `PermitRootLogin yes`，`PasswordAuthentication yes`
 
 ## git指令
+
 ```text
 安装git后
 $ git config --global user.name "Your Name"
@@ -135,3 +179,13 @@ $ git push origin 标签名 推送某个标签到远程
 $ git push origin --tags 推送所有标签
 $ git push origin :refs/tags/<tagname> 可以删除一个远程标签。
 ```
+
+## 三大镜像总结
+
+| 镜像名称 |                           镜像地址                           | 镜像运行指令 | 已安装软件       | 查看版本       |
+| -------- | :----------------------------------------------------------: | ------------ | ---------------- | -------------- |
+| centos7  |                                                              |              | systemd, ssh,vim |                |
+| debian11 |                                                              |              | systemd, ssh,vim |                |
+| ubuntu20 | docker run -itd --privileged=true --name c1 -p 20022:22 registry.cn-hangzhou.aliyuncs.com/lyr_public/ubuntu:2.0 /bin/bash |              | systemd, ssh,vim | lsb_release -a |
+
+> 解决debian11和ubuntu20开启自启动ssh服务问题，然后以后这两个配成`CMD ["systemd"]`

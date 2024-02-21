@@ -3,9 +3,10 @@ package test
 import (
 	"fmt"
 	docker "github.com/fsouza/go-dockerclient"
+	"os/exec"
 )
 
-func main() {
+func main01() {
 	client, err := docker.NewClientFromEnv()
 	if err != nil {
 		panic(err)
@@ -48,4 +49,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func main02() {
+	args := []string{"run", "--privileged=true", "-d", "-p", "10022:22", "-p", "10080:80", "--name", "c0", "registry.cn-hangzhou.aliyuncs.com/lyr_public/centos7:1.0"}
+	output, err := exec.Command("docker", args...).Output()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(output))
 }
