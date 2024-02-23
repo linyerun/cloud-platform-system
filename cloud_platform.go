@@ -39,10 +39,9 @@ func main() {
 	// 初始化项目全局属性
 	srvCtx := svc.NewServiceContext(c)
 
-	//  初始化异步协程池
+	// 初始化异步协程池
 	cancelCtx, cancelFunc := context.WithCancel(context.Background())
-	asynctask.InitAsyncTaskPool(cancelCtx, srvCtx)
-	defer cancelFunc()
+	svcGroup.Add(asynctask.NewMyAsyncTaskPoolServer(cancelCtx, srvCtx, cancelFunc))
 
 	// 注册路由
 	handler.RegisterHandlers(server, srvCtx)

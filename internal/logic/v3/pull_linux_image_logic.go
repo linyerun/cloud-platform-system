@@ -74,13 +74,13 @@ func (l *PullLinuxImageLogic) PullLinuxImage(req *types.ImagePullRequest) (resp 
 		Id:     utils.GetSnowFlakeIdAndBase64(),
 		UserId: l.ctx.Value("user").(*models.User).Id,
 		Type:   asynctask.ImagePullType,
-		Args: &asynctask.ImagePullArgs{
+		Args: (&asynctask.ImagePullArgs{
 			ImageName:            req.ImageName,
 			ImageTag:             req.ImageTag,
 			UserId:               l.ctx.Value("user").(*models.User).Id,
 			ImageEnabledCommands: req.ImageEnabledCommands,
 			ImageMustExportPorts: req.ImageMustExportPorts,
-		},
+		}).JsonMarshal(),
 		Status:   models.AsyncTaskIng,
 		CreateAt: time.Now().UnixMilli(),
 	}

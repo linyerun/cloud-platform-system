@@ -6,6 +6,7 @@ import (
 	"cloud-platform-system/internal/svc"
 	"cloud-platform-system/internal/utils"
 	"context"
+	"encoding/json"
 	"fmt"
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/pkg/errors"
@@ -15,11 +16,20 @@ import (
 const ImagePullType = "image_pull"
 
 type ImagePullArgs struct {
-	ImageName            string   `bson:"image_name"`
-	ImageTag             string   `bson:"image_tag"`
-	UserId               string   `bson:"user_id"`
-	ImageEnabledCommands []string `bson:"image_enabled_commands"`
-	ImageMustExportPorts []int64  `bson:"image_must_export_ports"`
+	ImageName            string   `json:"image_name"`
+	ImageTag             string   `json:"image_tag"`
+	UserId               string   `json:"user_id"`
+	ImageEnabledCommands []string `json:"image_enabled_commands"`
+	ImageMustExportPorts []int64  `json:"image_must_export_ports"`
+}
+
+func (args *ImagePullArgs) JsonMarshal() string {
+	bytes, _ := json.Marshal(args)
+	return string(bytes)
+}
+
+func (args *ImagePullArgs) JsonUnmarshal(data string) {
+	json.Unmarshal([]byte(data), args)
 }
 
 type ImagePullHandler struct {
@@ -31,9 +41,10 @@ func NewImagePullHandler(ctx context.Context, srvCtx *svc.ServiceContext) IAsync
 	return &ImagePullHandler{ctx: ctx, svcCtx: srvCtx}
 }
 
-func (i *ImagePullHandler) Execute(args any) (respData *RespData, status uint) {
+func (i *ImagePullHandler) Execute(args string) (respData *RespData, status uint) {
 	// 获取参数
-	req := args.(*ImagePullArgs)
+	req := new(ImagePullArgs)
+	req.JsonUnmarshal(args)
 
 	// 异步任务被执行, 归还分布式锁
 	defer func() {

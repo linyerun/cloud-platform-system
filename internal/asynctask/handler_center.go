@@ -6,7 +6,7 @@ import (
 )
 
 type IAsyncTaskHandler interface {
-	Execute(args any) (respData *RespData, status uint)
+	Execute(args string) (respData *RespData, status uint)
 }
 
 type TaskHandlerFactory struct {
