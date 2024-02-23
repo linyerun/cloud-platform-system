@@ -68,6 +68,7 @@ func (i *MyAsyncTaskPoolServer) Start() {
 									logx.Error(errors.Wrap(err, "update AsyncTask error"))
 								}
 							}
+							logx.Infof("[id=%s]的异步任务处理结束", asyncTask.Id)
 						}()
 						// 获取处理器
 						handler, ok := taskHandlerFactory.NewTaskHandler(asyncTask.Type)
