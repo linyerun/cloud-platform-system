@@ -32,3 +32,6 @@ Jwt:
 
 Pprof:
   Port: 9999
+
+AsyncTask:
+  PullTaskWaitMillSec: 5000

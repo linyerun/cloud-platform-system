@@ -1,19 +1,19 @@
 package v3
 
 import (
+	"cloud-platform-system/internal/asynctask"
 	"cloud-platform-system/internal/common"
 	"cloud-platform-system/internal/models"
+	"cloud-platform-system/internal/svc"
+	"cloud-platform-system/internal/types"
 	"cloud-platform-system/internal/utils"
 	"context"
 	"fmt"
-	docker "github.com/fsouza/go-dockerclient"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
-
-	"cloud-platform-system/internal/svc"
-	"cloud-platform-system/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -54,8 +54,8 @@ func (l *PullLinuxImageLogic) PullLinuxImage(req *types.ImagePullRequest) (resp 
 		return &types.CommonResponse{Code: 400, Msg: "镜像已经存在，无需拉取！"}, nil
 	}
 
-	// 使用锁来保证同一个镜像只能有一个管理员拉取
-	res := l.svcCtx.RedisClient.SetNX(l.ctx, fmt.Sprintf(l.svcCtx.ImagePrefix, req.ImageName+":"+req.ImageTag), "1", time.Minute*30)
+	// 使用锁来保证同一个镜像只能有一个管理员创建拉取任务
+	res := l.svcCtx.RedisClient.SetNX(l.ctx, fmt.Sprintf(l.svcCtx.ImagePrefix, req.ImageName+":"+req.ImageTag), "1", redis.KeepTTL)
 	if err = res.Err(); err != nil {
 		l.Logger.Error(errors.Wrap(err, "error to apply for a distributed lock"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
@@ -66,48 +66,35 @@ func (l *PullLinuxImageLogic) PullLinuxImage(req *types.ImagePullRequest) (resp 
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
 	if !ok {
-		return &types.CommonResponse{Code: 401, Msg: "已有管理员拉取此镜像，无所重复拉取镜像！"}, nil
-	}
-	// 归还分布式锁
-	defer l.svcCtx.RedisClient.Del(l.ctx, fmt.Sprintf(l.svcCtx.ImagePrefix, req.ImageName+":"+req.ImageTag))
-
-	// 执行拉取操作
-	err = l.svcCtx.DockerClient.PullImage(docker.PullImageOptions{Repository: req.ImageName, Tag: req.ImageTag}, docker.AuthConfiguration{})
-	if err != nil {
-		l.Logger.Error(errors.Wrap(err, "pull image error"))
-		return &types.CommonResponse{Code: 500, Msg: "拉取镜像异常"}, nil
+		return &types.CommonResponse{Code: 401, Msg: "已有管理员拉取此镜像或创建拉取该镜像的异步任务，无所重复拉取镜像！"}, nil
 	}
 
-	// 将镜像信息保存到mongo中
-	dockerImage, err := l.svcCtx.DockerClient.InspectImage(req.ImageName + ":" + req.ImageTag)
-	if err != nil {
-		err = l.svcCtx.DockerClient.RemoveImage(req.ImageName + ":" + req.ImageTag)
-		if err != nil {
-			l.Logger.Error(errors.Wrap(err, "image remove error"))
-			l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(req.ImageName+":"+req.ImageTag, "需要删除这个镜像"))
-		}
-		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
+	// 创建异步任务
+	asyncTask := models.AsyncTask{
+		Id:     utils.GetSnowFlakeIdAndBase64(),
+		UserId: l.ctx.Value("user").(*models.User).Id,
+		Type:   asynctask.ImagePullType,
+		Args: &asynctask.ImagePullArgs{
+			ImageName:            req.ImageName,
+			ImageTag:             req.ImageTag,
+			UserId:               l.ctx.Value("user").(*models.User).Id,
+			ImageEnabledCommands: req.ImageEnabledCommands,
+			ImageMustExportPorts: req.ImageMustExportPorts,
+		},
+		Status:   models.AsyncTaskIng,
+		CreateAt: time.Now().UnixMilli(),
 	}
-	image := &models.LinuxImage{
-		Id:              utils.GetSnowFlakeIdAndBase64(),
-		CreatorId:       l.ctx.Value("user").(*models.User).Id,
-		Name:            req.ImageName,
-		Tag:             req.ImageTag,
-		ImageId:         dockerImage.ID,
-		Size:            dockerImage.Size,
-		EnableCommands:  req.ImageEnabledCommands,
-		MustExportPorts: req.ImageMustExportPorts,
-	}
-	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).InsertOne(l.ctx, image)
+	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.AsyncTaskDocument).InsertOne(l.ctx, asyncTask)
 	if err != nil {
-		l.Logger.Error(errors.Wrap(err, "save image msg to mongo error"))
-		if err = l.svcCtx.DockerClient.RemoveImage(req.ImageName + ":" + req.ImageTag); err != nil {
-			l.Logger.Error(errors.Wrap(err, "image remove error"))
-			l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(req.ImageName+":"+req.ImageTag, "需要删除这个镜像"))
+		l.Logger.Error(errors.Wrap(err, "insert async task error"))
+		// 释放分布式锁
+		if err = l.svcCtx.RedisClient.Del(l.ctx, fmt.Sprintf(l.svcCtx.ImagePrefix, req.ImageName+":"+req.ImageTag)).Err(); err != nil {
+			logx.Error(errors.Wrap(err, fmt.Sprintf(l.svcCtx.ImagePrefix, req.ImageName+":"+req.ImageTag)+", 删除失败请即使清除避免系统异常"))
+			l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(fmt.Sprintf(l.svcCtx.ImagePrefix, req.ImageName+":"+req.ImageTag), "需要抓紧手动删除该分布式锁"))
 		}
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
 
 	// 返回结果
-	return &types.CommonResponse{Code: 200, Msg: "拉取镜像成功"}, nil
+	return &types.CommonResponse{Code: 200, Msg: "创建拉取镜像任务成功，等待执行"}, nil
 }

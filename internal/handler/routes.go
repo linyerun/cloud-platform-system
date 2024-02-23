@@ -95,6 +95,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: v3.GetFormByStatusHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodGet,
+					Path:    "/asynctask/list",
+					Handler: v3.GetAsyncTaskListHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodDelete,
 					Path:    "/container/:id",
 					Handler: v3.DeleteContainerHandler(serverCtx),

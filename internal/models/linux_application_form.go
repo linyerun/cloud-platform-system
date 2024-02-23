@@ -14,4 +14,6 @@ type LinuxApplicationForm struct { // 这个申请由用户对应的管理员进
 	ExportPorts []int64 `bson:"export_ports"`
 	Explanation string  `bson:"explanation"` // 申请说明
 	Status      uint    `bson:"status"`
+	CreateAt    int64   `bson:"create_at"`
+	FinishAt    int64   `bson:"finish_at"`
 }

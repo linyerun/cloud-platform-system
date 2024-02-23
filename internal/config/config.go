@@ -30,4 +30,7 @@ type Config struct {
 	Pprof struct {
 		Port int
 	}
+	AsyncTask struct {
+		PullTaskWaitMillSec int64
+	}
 }

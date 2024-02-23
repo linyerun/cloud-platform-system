@@ -1,9 +1,11 @@
 package main
 
 import (
+	"cloud-platform-system/internal/asynctask"
 	"cloud-platform-system/internal/config"
 	"cloud-platform-system/internal/handler"
 	"cloud-platform-system/internal/svc"
+	"context"
 	"flag"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -34,11 +36,19 @@ func main() {
 	server := rest.MustNewServer(c.RestConf)
 	svcGroup.Add(server)
 
-	ctx := svc.NewServiceContext(c)
-	handler.RegisterHandlers(server, ctx)
+	// 初始化项目全局属性
+	srvCtx := svc.NewServiceContext(c)
 
-	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	//  初始化异步协程池
+	cancelCtx, cancelFunc := context.WithCancel(context.Background())
+	asynctask.InitAsyncTaskPool(cancelCtx, srvCtx)
+	defer cancelFunc()
+
+	// 注册路由
+	handler.RegisterHandlers(server, srvCtx)
+
 	// 启动
+	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	svcGroup.Start()
 }
 
