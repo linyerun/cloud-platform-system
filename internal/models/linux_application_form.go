@@ -9,7 +9,7 @@ const (
 )
 
 type LinuxApplicationForm struct { // 这个申请由用户对应的管理员进行审核
-	Id          string `bson:"id" json:"id"`
+	Id          string `bson:"_id" json:"id"`
 	UserId      string `bson:"user_id" json:"user_id"`
 	Explanation string `bson:"explanation" json:"explanation"` // 申请说明
 
