@@ -106,8 +106,8 @@ func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.
 		commands := utils.CreateContainerRunCommand(append(portMappingOptions, nameOption, coreCountOption, memoryOption, memorySwapOption, diskSizeOption, containerRunCommandOption)...)
 		output, err := exec.Command("docker", commands...).Output()
 		if err != nil {
-			// 复原form
-			rollback01(req, l)
+			// 复原form、归还端口
+			rollback02(req, l, from, to)
 
 			// 记录错误日志
 			l.Logger.Error(errors.Wrap(err, "run LinuxContainer error: "+string(output)))
@@ -141,7 +141,7 @@ func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.
 		_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxContainerDocument).InsertOne(l.ctx, linux)
 		if err != nil {
 			// 回滚前面的修改
-			rollback02(req, l, containerName, from, to)
+			rollback03(req, l, containerName, from, to)
 			l.Logger.Error(errors.Wrap(err, ""))
 			return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 		}
@@ -175,21 +175,24 @@ func rollback01(req *types.HandleUserLinuxApplicationReq, l *HandleUserLinuxAppl
 	}
 }
 
-func rollback02(req *types.HandleUserLinuxApplicationReq, l *HandleUserLinuxApplicationLogic, containerName string, from, to uint) {
+func rollback02(req *types.HandleUserLinuxApplicationReq, l *HandleUserLinuxApplicationLogic, from, to uint) {
+	rollback01(req, l)
+
 	// 归还端口
 	err := l.svcCtx.PortManager.RepayTenPort(from, to)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, fmt.Sprintf("归还端口失败, 需要手动输入到port_recycle表. from=%d, to=%d", from, to)))
 		l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(map[string]uint{"from": from, "to": to}, "手动把from到to保存到port_recycle中"))
 	}
+}
+
+func rollback03(req *types.HandleUserLinuxApplicationReq, l *HandleUserLinuxApplicationLogic, containerName string, from, to uint) {
+	rollback02(req, l, from, to)
 
 	// 删除容器
-	err = l.svcCtx.DockerClient.RemoveContainer(docker.RemoveContainerOptions{Context: l.ctx, ID: containerName, Force: true})
+	err := l.svcCtx.DockerClient.RemoveContainer(docker.RemoveContainerOptions{Context: l.ctx, ID: containerName, Force: true})
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "remove docker container error"))
 		l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(map[string]string{"name": containerName}, "需要手动删除这个容器在docker中"))
 	}
-
-	// 执行rollback1
-	rollback01(req, l)
 }
