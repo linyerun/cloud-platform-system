@@ -35,5 +35,5 @@ func GetToken(user *models.User, log logx.Logger, svcCtx *svc.ServiceContext) (*
 		return &types.CommonResponse{Code: 500, Msg: err.Error()}, nil
 	}
 
-	return &types.CommonResponse{Code: 200, Msg: "成功", Data: map[string]string{"token": token, "refresh_token": refreshToken}}, nil
+	return &types.CommonResponse{Code: 200, Msg: "成功", Data: map[string]any{"token": token, "refresh_token": refreshToken, "auth": user.Auth}}, nil
 }
