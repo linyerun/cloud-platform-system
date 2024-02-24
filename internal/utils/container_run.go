@@ -35,7 +35,7 @@ func WithNameOption(name string) ContainerRunCommandOption {
 
 func WithCpuCoreCountOption(coreCnt uint) ContainerRunCommandOption {
 	return func(options *containerRunCommandOptions) {
-		options.commands = append(options.commands, "--cpu", fmt.Sprintf("%d", coreCnt))
+		options.commands = append(options.commands, "--cpus", fmt.Sprintf("%d", coreCnt))
 	}
 }
 
@@ -63,8 +63,9 @@ func WithMemorySwapOption(memorySwap int64) ContainerRunCommandOption {
 
 func WithDiskSizeOption(diskSize uint) ContainerRunCommandOption {
 	return func(options *containerRunCommandOptions) {
-		diskSize /= 1024
-		options.commands = append(options.commands, "--storage-opt", fmt.Sprintf("size=%dM", diskSize))
+		// TODO 调试不行，后面可以了再搞
+		//diskSize /= 1024
+		//options.commands = append(options.commands, "--storage-opt", fmt.Sprintf("size=%dM", diskSize))
 	}
 }
 
