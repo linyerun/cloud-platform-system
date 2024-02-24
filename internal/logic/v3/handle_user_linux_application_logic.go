@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"os/exec"
+	"strings"
 	"time"
 
 	"cloud-platform-system/internal/svc"
@@ -53,7 +54,7 @@ func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.
 		}
 
 		// 启动容器时需要做的配置
-		containerName := utils.GetSnowFlakeIdAndBase64()
+		containerName := strings.ReplaceAll(utils.GetSnowFlakeIdAndBase64(), "=", ".")
 		nameOption := utils.WithNameOption(containerName)
 		coreCountOption := utils.WithCpuCoreCountOption(form.CoreCount)
 		memoryOption := utils.WithMemoryOption(form.Memory)
