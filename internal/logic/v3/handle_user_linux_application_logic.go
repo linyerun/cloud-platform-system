@@ -93,7 +93,7 @@ func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.
 		}
 		var portMappingOptions []utils.ContainerRunCommandOption
 		var portsMapping = make(map[int64]int64)
-		for i := from; i < to; i++ {
+		for i := from; i <= to; i++ {
 			if len(image.MustExportPorts) <= int(i-from) { // 超出范围的
 				portMappingOptions = append(portMappingOptions, utils.WithPortMappingOption(int64(i), int64(i)))
 				portsMapping[int64(i)] = int64(i)
