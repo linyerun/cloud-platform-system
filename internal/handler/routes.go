@@ -82,7 +82,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodGet,
-					Path:    "/linux_container/list/:user_id",
+					Path:    "/linux_container/list",
 					Handler: v2.GetLinuxContainerByUserIdHandler(serverCtx),
 				},
 				{

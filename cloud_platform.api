@@ -65,7 +65,7 @@ service cloud_platform {
 
 	// 获取自己容器列表(OK)
 	@handler GetLinuxContainerByUserId
-	get /linux_container/list/:user_id returns (CommonResponse)
+	get /linux_container/list returns (CommonResponse)
 
 	// 删除停机状态的容器
 	@handler DelLinuxStopContainer
