@@ -9,25 +9,25 @@ const (
 )
 
 type LinuxApplicationForm struct { // 这个申请由用户对应的管理员进行审核
-	Id          string `bson:"id"`
-	UserId      string `bson:"user_id"`
-	Explanation string `bson:"explanation"` // 申请说明
+	Id          string `bson:"id" json:"id"`
+	UserId      string `bson:"user_id" json:"user_id"`
+	Explanation string `bson:"explanation" json:"explanation"` // 申请说明
 
-	ImageId       string  `bson:"image_id"`
-	ContainerName string  `bson:"container_name"`
-	ExportPorts   []int64 `bson:"export_ports"`
+	ImageId       string  `bson:"image_id" json:"image_id"`
+	ContainerName string  `bson:"container_name" json:"container_name"`
+	ExportPorts   []int64 `bson:"export_ports" json:"export_ports"`
 
 	// 内存相关
-	Memory     uint `bson:"memory"`
-	MemorySwap uint `bson:"memory_swap"` // -1
+	Memory     uint `bson:"memory" json:"memory"`
+	MemorySwap uint `bson:"memory_swap" json:"memory_swap"` // -1
 
 	// CPU相关
-	CoreCount uint `bson:"core_count"` // 设置工作线程的数量
+	CoreCount uint `bson:"core_count" json:"core_count"` // 设置工作线程的数量
 
 	// 磁盘数
-	DiskSize uint `bson:"disk_size"`
+	DiskSize uint `bson:"disk_size" json:"disk_size"`
 
-	Status   uint  `bson:"status"`
-	CreateAt int64 `bson:"create_at"`
-	FinishAt int64 `bson:"finish_at"`
+	Status   uint  `bson:"status" json:"status"`
+	CreateAt int64 `bson:"create_at" json:"create_at"`
+	FinishAt int64 `bson:"finish_at" json:"finish_at"`
 }

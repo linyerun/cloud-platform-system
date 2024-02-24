@@ -51,15 +51,25 @@ service cloud_platform {
 	@handler UserGetLinuxImages
 	get /user/linux/list returns (CommonResponse)
 
-	// 提交Linux容器开通申请
+	// 提交Linux容器开通申请(OK)
 	@handler LinuxStartApply
 	post /user/apply/linux (LinuxStartApplyRequest) returns (CommonResponse)
 
-	// 获取所有Linux申请单
+	// 获取所有Linux申请单(OK)
 	@handler GetLinuxApplicationFormList
 	get /linux_application_form/list returns (CommonResponse)
-// 关闭/开启/重启容器
-// 获取自己容器列表
+
+	// 关闭/开启容器(OK)
+	@handler UpdateLinuxStatus
+	put /linux_container/change/:container_id/:status (UpdateLinuxStatusReq) returns (CommonResponse)
+
+	// 获取自己容器列表(OK)
+	@handler GetLinuxContainerByUserId
+	get /linux_container/list/:user_id returns (CommonResponse)
+
+	// 删除停机状态的容器
+	@handler DelLinuxStopContainer
+	delete /linux_container/:container_id (DelLinuxStopContainerReq) returns (CommonResponse)
 }
 
 @server (
@@ -216,6 +226,13 @@ type (
 	}
 	GetUserMsgByIdReq {
 		UserId string `path:"id"`
+	}
+	UpdateLinuxStatusReq {
+		ContainerId string `path:"container_id"`
+		Status      uint   `path:"status"`
+	}
+	DelLinuxStopContainerReq {
+		ContainerId string `path:"container_id"`
 	}
 	CommonResponse {
 		Code int         `json:"code"`

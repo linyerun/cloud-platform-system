@@ -27,6 +27,10 @@ type CreateAdminRequest struct {
 	Name     string `json:"name"`
 }
 
+type DelLinuxStopContainerReq struct {
+	ContainerId string `path:"container_id"`
+}
+
 type DeleteContainerRequest struct {
 	ContainerId string `path:"id"`
 }
@@ -78,6 +82,11 @@ type PutVisitorToUserRequest struct {
 	VisitorId    string `path:"visitor_id"`
 	Status       uint   `path:"status"`
 	VisitorEmail string `json:"visitor_email"`
+}
+
+type UpdateLinuxStatusReq struct {
+	ContainerId string `path:"container_id"`
+	Status      uint   `path:"status"`
 }
 
 type UserLoginRequest struct {

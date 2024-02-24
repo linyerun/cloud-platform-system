@@ -71,6 +71,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: v2.GetLinuxApplicationFormListHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodDelete,
+					Path:    "/linux_container/:container_id",
+					Handler: v2.DelLinuxStopContainerHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/linux_container/change/:container_id/:status",
+					Handler: v2.UpdateLinuxStatusHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/linux_container/list/:user_id",
+					Handler: v2.GetLinuxContainerByUserIdHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodPost,
 					Path:    "/user/apply/linux",
 					Handler: v2.LinuxStartApplyHandler(serverCtx),
@@ -162,6 +177,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/create_admin",
 					Handler: v4.CreateAdminHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/exception/list",
+					Handler: v4.GetExceptionListHandler(serverCtx),
 				},
 			}...,
 		),
