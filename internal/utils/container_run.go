@@ -52,6 +52,9 @@ func WithMemorySwapOption(memorySwap int64) ContainerRunCommandOption {
 			memorySwap /= 1024
 		} else if memorySwap != -1 {
 			memorySwap = 100
+		} else {
+			options.commands = append(options.commands, fmt.Sprintf("--memory-swap=%d", memorySwap))
+			return
 		}
 
 		options.commands = append(options.commands, fmt.Sprintf("--memory-swap=%dM", memorySwap))

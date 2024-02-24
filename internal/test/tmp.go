@@ -1,11 +1,5 @@
 package test
 
-import (
-	"context"
-	"fmt"
-	docker "github.com/fsouza/go-dockerclient"
-)
-
 //func main01() {
 //	client, err := docker.NewClientFromEnv()
 //	if err != nil {
@@ -60,19 +54,19 @@ import (
 //	fmt.Println(string(output))
 //}
 
-func main03() {
-	client, err := docker.NewClientFromEnv()
-	if err != nil {
-		panic(err)
-	}
-	containers, err := client.ListContainers(docker.ListContainersOptions{Context: context.Background(), Filters: map[string][]string{"name": {"mongo"}}})
-	if err != nil {
-		panic(err)
-	}
-	for _, container := range containers {
-		fmt.Println(container.ID)
-	}
-}
+//func main03() {
+//	client, err := docker.NewClientFromEnv()
+//	if err != nil {
+//		panic(err)
+//	}
+//	containers, err := client.ListContainers(docker.ListContainersOptions{Context: context.Background(), Filters: map[string][]string{"name": {"mongo"}}})
+//	if err != nil {
+//		panic(err)
+//	}
+//	for _, container := range containers {
+//		fmt.Println(container.ID)
+//	}
+//}
 
 //// 获取容器信息
 //containers, err := l.svcCtx.DockerClient.ListContainers(docker.ListContainersOptions{Context: context.Background(), Filters: map[string][]string{"name": {containerName}}})
@@ -85,3 +79,7 @@ func main03() {
 //
 //return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 //}
+
+func main() {
+
+}
