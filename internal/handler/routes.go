@@ -66,6 +66,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.JwtAuth, serverCtx.User},
 			[]rest.Route{
 				{
+					Method:  http.MethodGet,
+					Path:    "/linux_application_form/list",
+					Handler: v2.GetLinuxApplicationFormListHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodPost,
 					Path:    "/user/apply/linux",
 					Handler: v2.LinuxStartApplyHandler(serverCtx),
@@ -125,9 +130,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: v3.DeleteUserByIdHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodPut,
+					Path:    "/user_linux_apply/handle/:form_id/:status",
+					Handler: v3.HandleUserLinuxApplicationHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
 					Path:    "/users",
 					Handler: v3.GetUsersHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/users_linux_application_form/list",
+					Handler: v3.GetUsersLinuxApplicationFormListHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPut,
@@ -161,6 +176,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPut,
 					Path:    "/token/refresh",
 					Handler: v5.RefreshTokenHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/user_msg/:id",
+					Handler: v5.GetUserMsgByIdHandler(serverCtx),
 				},
 			}...,
 		),

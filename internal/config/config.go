@@ -33,4 +33,9 @@ type Config struct {
 	AsyncTask struct {
 		PullTaskWaitMillSec int64
 	}
+	Container struct {
+		Host         string
+		InitUsername string
+		InitPassword string
+	}
 }

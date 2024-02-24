@@ -43,6 +43,15 @@ type GetFormByStatusRequest struct {
 	Status uint `path:"status"`
 }
 
+type GetUserMsgByIdReq struct {
+	UserId string `path:"id"`
+}
+
+type HandleUserLinuxApplicationReq struct {
+	FormId string `path:"form_id"`
+	Status uint   `path:"status"`
+}
+
 type ImageDelRequest struct {
 	Id string `path:"id"`
 }
@@ -55,8 +64,14 @@ type ImagePullRequest struct {
 }
 
 type LinuxStartApplyRequest struct {
-	ImageId     string  `json:"image_id"`
-	ExportPorts []int64 `json:"export_ports"`
+	ContainerName string  `json:"container_name"`
+	ImageId       string  `json:"image_id"`
+	ExportPorts   []int64 `json:"export_ports"`
+	Explanation   string  `json:"explanation"`
+	Memory        uint    `json:"memory"`
+	MemorySwap    uint    `json:"memory_swap"`
+	CoreCount     uint    `json:"core_count"`
+	DiskSize      uint    `json:"disk_size"`
 }
 
 type PutVisitorToUserRequest struct {

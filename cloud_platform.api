@@ -54,6 +54,10 @@ service cloud_platform {
 	// 提交Linux容器开通申请
 	@handler LinuxStartApply
 	post /user/apply/linux (LinuxStartApplyRequest) returns (CommonResponse)
+
+	// 获取所有Linux申请单
+	@handler GetLinuxApplicationFormList
+	get /linux_application_form/list returns (CommonResponse)
 // 关闭/开启/重启容器
 // 获取自己容器列表
 }
@@ -84,9 +88,17 @@ service cloud_platform {
 	@handler VisitorToUser
 	put /visitor_to_user/:visitor_id/:status (PutVisitorToUserRequest) returns (CommonResponse)
 
-	// 获取名下的异步任务
+	// 获取名下的异步任务(OK)
 	@handler GetAsyncTaskList
 	get /asynctask/list returns (CommonResponse)
+
+	// 获取自己用户提交的申请单(OK)
+	@handler GetUsersLinuxApplicationFormList
+	get /users_linux_application_form/list returns (CommonResponse)
+
+	// 处理用户的申请
+	@handler HandleUserLinuxApplication
+	put /user_linux_apply/handle/:form_id/:status (HandleUserLinuxApplicationReq) returns (CommonResponse)
 
 	// 查看自己管理的用户的容器列表
 	@handler GetContainerList
@@ -114,6 +126,10 @@ service cloud_platform {
 	// 创建管理员(OK)
 	@handler CreateAdmin
 	post /create_admin (CreateAdminRequest) returns (CommonResponse)
+
+	// 获取异常列表的数据
+	@handler GetExceptionList
+	get /exception/list returns (CommonResponse)
 }
 
 @server (
@@ -125,6 +141,9 @@ service cloud_platform {
 	// 刷新token(OK)
 	@handler RefreshToken
 	put /token/refresh returns (CommonResponse)
+
+	@handler GetUserMsgById
+	get /user_msg/:id (GetUserMsgByIdReq) returns (CommonResponse)
 }
 
 type (
@@ -182,8 +201,21 @@ type (
 		Status uint `path:"status"`
 	}
 	LinuxStartApplyRequest {
-		ImageId     string  `json:"image_id"`
-		ExportPorts []int64 `json:"export_ports"`
+		ContainerName string  `json:"container_name"`
+		ImageId       string  `json:"image_id"`
+		ExportPorts   []int64 `json:"export_ports"`
+		Explanation   string  `json:"explanation"`
+		Memory        uint    `json:"memory"`
+		MemorySwap    uint    `json:"memory_swap"`
+		CoreCount     uint    `json:"core_count"`
+		DiskSize      uint    `json:"disk_size"`
+	}
+	HandleUserLinuxApplicationReq {
+		FormId string `path:"form_id"`
+		Status uint   `path:"status"`
+	}
+	GetUserMsgByIdReq {
+		UserId string `path:"id"`
 	}
 	CommonResponse {
 		Code int         `json:"code"`
