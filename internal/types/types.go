@@ -72,8 +72,8 @@ type LinuxStartApplyRequest struct {
 	ImageId       string  `json:"image_id"`
 	ExportPorts   []int64 `json:"export_ports"`
 	Explanation   string  `json:"explanation"`
-	Memory        uint    `json:"memory"`
-	MemorySwap    uint    `json:"memory_swap"`
+	Memory        int64   `json:"memory"`
+	MemorySwap    int64   `json:"memory_swap"`
 	CoreCount     uint    `json:"core_count"`
 	DiskSize      uint    `json:"disk_size"`
 }

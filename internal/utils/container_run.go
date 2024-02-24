@@ -39,14 +39,14 @@ func WithCpuCoreCountOption(coreCnt uint) ContainerRunCommandOption {
 	}
 }
 
-func WithMemoryOption(memory uint) ContainerRunCommandOption {
+func WithMemoryOption(memory int64) ContainerRunCommandOption {
 	return func(options *containerRunCommandOptions) {
 		memory /= 1024
 		options.commands = append(options.commands, "-m", fmt.Sprintf("%dM", memory))
 	}
 }
 
-func WithMemorySwapOption(memorySwap uint) ContainerRunCommandOption {
+func WithMemorySwapOption(memorySwap int64) ContainerRunCommandOption {
 	return func(options *containerRunCommandOptions) {
 		memorySwap /= 1024
 		options.commands = append(options.commands, fmt.Sprintf("--memory-swap=%dM", memorySwap))

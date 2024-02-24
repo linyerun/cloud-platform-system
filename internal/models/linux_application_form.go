@@ -18,8 +18,8 @@ type LinuxApplicationForm struct { // 这个申请由用户对应的管理员进
 	ExportPorts   []int64 `bson:"export_ports" json:"export_ports"`
 
 	// 内存相关
-	Memory     uint `bson:"memory" json:"memory"`
-	MemorySwap uint `bson:"memory_swap" json:"memory_swap"` // -1
+	Memory     int64 `bson:"memory" json:"memory"`
+	MemorySwap int64 `bson:"memory_swap" json:"memory_swap"` // 允许为-1
 
 	// CPU相关
 	CoreCount uint `bson:"core_count" json:"core_count"` // 设置工作线程的数量

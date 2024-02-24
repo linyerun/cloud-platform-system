@@ -26,8 +26,8 @@ type LinuxContainer struct {
 	InitPassword string `bson:"init_password"`
 
 	// 内存相关(单位: 字节)
-	Memory     uint `bson:"memory"`
-	MemorySwap uint `bson:"memory_swap"`
+	Memory     int64 `bson:"memory"`
+	MemorySwap int64 `bson:"memory_swap"`
 
 	// CPU相关
 	CoreCount uint `bson:"core_count"` // 设置工作线程的数量
