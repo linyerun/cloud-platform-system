@@ -104,6 +104,7 @@ func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.
 
 		// 运行Linux容器
 		commands := utils.CreateContainerRunCommand(append(portMappingOptions, nameOption, coreCountOption, memoryOption, memorySwapOption, diskSizeOption, containerRunCommandOption)...)
+		l.Logger.Infof("%v", commands)
 		output, err := exec.Command("docker", commands...).Output()
 		if err != nil {
 			// 复原form、归还端口
