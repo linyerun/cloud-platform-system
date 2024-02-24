@@ -21,7 +21,7 @@ func init() {
 
 func TestInsertSuperAdmin(t *testing.T) {
 	admin := &models.User{
-		// TODO: 为啥运行太快获取的是零值的Base64
+		// 为啥运行太快获取的是零值的Base64, 因为把固定值设置为项目运行时间, 别这样就好了
 		Id:       utils.GetSnowFlakeIdAndBase64(),
 		Email:    "linyerun0620@qq.com",
 		Password: utils.DoHashAndBase64(svcCtx.Config.Salt, "123456"),

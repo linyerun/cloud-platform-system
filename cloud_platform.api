@@ -67,7 +67,7 @@ service cloud_platform {
 	@handler GetLinuxContainerByUserId
 	get /linux_container/list returns (CommonResponse)
 
-	// 删除停机状态的容器
+	// 删除Linux容器
 	@handler DelLinuxStopContainer
 	delete /linux_container/:container_id (DelLinuxStopContainerReq) returns (CommonResponse)
 }
@@ -102,11 +102,11 @@ service cloud_platform {
 	@handler GetAsyncTaskList
 	get /asynctask/list returns (CommonResponse)
 
-	// 获取自己用户提交的申请单(OK)
+	// 获取自己用户提交的Linux容器开启申请单(OK)
 	@handler GetUsersLinuxApplicationFormList
 	get /users_linux_application_form/list returns (CommonResponse)
 
-	// 处理用户的申请
+	// 处理用户的申请(OK)
 	@handler HandleUserLinuxApplication
 	put /user_linux_apply/handle/:form_id/:status (HandleUserLinuxApplicationReq) returns (CommonResponse)
 
