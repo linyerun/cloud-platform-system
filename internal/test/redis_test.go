@@ -36,3 +36,13 @@ func TestGetDel(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestGetRedisList(t *testing.T) {
+	dataArr, err := svcCtx.RedisClient.LRange(context.Background(), svcCtx.ExceptionList, 0, -1).Result()
+	if err != nil {
+		panic(err)
+	}
+	for _, msg := range dataArr {
+		fmt.Println(msg)
+	}
+}
