@@ -67,7 +67,7 @@ service cloud_platform {
 	@handler GetLinuxContainerByUserId
 	get /linux_container/list returns (CommonResponse)
 
-	// 删除Linux容器
+	// 删除Linux容器(OK)
 	@handler DelLinuxStopContainer
 	delete /linux_container/:container_id (DelLinuxStopContainerReq) returns (CommonResponse)
 }
@@ -151,9 +151,6 @@ service cloud_platform {
 	// 刷新token(OK)
 	@handler RefreshToken
 	put /token/refresh returns (CommonResponse)
-
-	@handler GetUserMsgById
-	get /user_msg/:id (GetUserMsgByIdReq) returns (CommonResponse)
 }
 
 type (
@@ -223,9 +220,6 @@ type (
 	HandleUserLinuxApplicationReq {
 		FormId string `path:"form_id"`
 		Status uint   `path:"status"`
-	}
-	GetUserMsgByIdReq {
-		UserId string `path:"id"`
 	}
 	UpdateLinuxStatusReq {
 		ContainerId string `path:"container_id"`

@@ -47,10 +47,6 @@ type GetFormByStatusRequest struct {
 	Status uint `path:"status"`
 }
 
-type GetUserMsgByIdReq struct {
-	UserId string `path:"id"`
-}
-
 type HandleUserLinuxApplicationReq struct {
 	FormId string `path:"form_id"`
 	Status uint   `path:"status"`

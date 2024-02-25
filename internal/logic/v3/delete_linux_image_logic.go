@@ -47,6 +47,15 @@ func (l *DeleteLinuxImageLogic) DeleteLinuxImage(req *types.ImageDelRequest) (re
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
 
+	// 根据image_id判断是否又被容器依赖，有则无法被删除
+	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxContainerDocument).Find(l.ctx, bson.D{{"image_id", dockerImage.Id}})
+	if err != nil && err != mongo.ErrNoDocuments {
+		l.Logger.Error(err)
+		return &types.CommonResponse{Code: 500, Msg: "查找 LinuxContainerDocument Error"}, nil
+	} else if err == nil {
+		return &types.CommonResponse{Code: 400, Msg: "不允许删除该镜像，因为还有容器依赖该镜像！"}, nil
+	}
+
 	// 获取分布式锁，然后执行删除操作
 	// 使用锁来保证同一个镜像只能有一个管理员删除
 	ret := l.svcCtx.RedisClient.SetNX(l.ctx, fmt.Sprintf(l.svcCtx.ImagePrefix, dockerImage.ImageId), "1", time.Second*30)
