@@ -7,6 +7,7 @@ import (
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"sort"
 
 	"cloud-platform-system/internal/svc"
 	"cloud-platform-system/internal/types"
@@ -52,8 +53,22 @@ func (l *DelLinuxStopContainerLogic) DelLinuxStopContainer(req *types.DelLinuxSt
 	// 删除docker中对应的容器(如果失败了，需要管理员手动操作)
 	err = l.svcCtx.DockerClient.RemoveContainer(docker.RemoveContainerOptions{ID: linux.Name, Force: true})
 	if err != nil {
-		l.Logger.Error(errors.Wrap(err, "移除docker容器失败, 需要手动删除。container name: "+linux.Name))
+		l.Logger.Error(errors.Wrap(err, "移除docker容器失败, 需要手动删除并手动归还端口到mongo对应的文档中。container name: "+linux.Name))
 		l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(linux.Name, "在docker中移除该名字的容器"))
+		// 响应结果(其实只是逻辑删除)
+		return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
+	}
+
+	// 归还端口
+	portsMapping := linux.PortsMapping
+	var ports []int
+	for k := range portsMapping {
+		ports = append(ports, int(k))
+	}
+	sort.Ints(ports)
+	if err = l.svcCtx.PortManager.RepayTenPort(uint(ports[0]), uint(ports[len(ports)-1])); err != nil {
+		l.Logger.Error(err)
+		l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(map[string]uint{"start_port": uint(ports[0]), "stop_port": uint(ports[len(ports)-1])}, "把端口手动写入port_recycle"))
 	}
 
 	// 响应结果

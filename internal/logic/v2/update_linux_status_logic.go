@@ -44,7 +44,7 @@ func (l *UpdateLinuxStatusLogic) UpdateLinuxStatus(req *types.UpdateLinuxStatusR
 	}
 
 	// 根据容器状态判断是否处于相反状态
-	if req.Status == container.Status || req.Status != models.LinuxSleep || req.Status != models.LinuxRunning {
+	if req.Status == container.Status || (req.Status != models.LinuxSleep && req.Status != models.LinuxRunning) {
 		return &types.CommonResponse{Code: 400, Msg: "status参数有误"}, nil
 	}
 
@@ -65,7 +65,6 @@ func (l *UpdateLinuxStatusLogic) UpdateLinuxStatus(req *types.UpdateLinuxStatusR
 		updateData = bson.M{"status": req.Status, "start_time": time.Now().UnixMilli()}
 	}
 
-	// 修改容器状态
 	_, err = doc.UpdateByID(l.ctx, req.ContainerId, bson.D{{"$set", updateData}})
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "启动docker容器失败"))
