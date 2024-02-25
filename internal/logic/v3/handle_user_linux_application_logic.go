@@ -126,7 +126,7 @@ func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.
 
 			CreateAt:  time.Now().UnixMilli(),
 			StartTime: time.Now().UnixMilli(),
-			Status:    models.LinuxSleep,
+			Status:    models.LinuxRunning,
 
 			Host:         l.svcCtx.Config.Container.Host,
 			PortsMapping: portsMapping,
