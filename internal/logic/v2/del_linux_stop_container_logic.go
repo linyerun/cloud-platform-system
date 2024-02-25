@@ -44,10 +44,10 @@ func (l *DelLinuxStopContainerLogic) DelLinuxStopContainer(req *types.DelLinuxSt
 			return nil, err
 		}
 		return linux, nil
-	})
-	if err != nil {
+	}, models.LinuxContainerDocument)
+	if err != nil && err != common.SaveMongoDelDataError {
 		l.Logger.Error(errors.Wrap(err, "delete data error"))
-		return &types.CommonResponse{Code: 200, Msg: "系统异常"}, nil
+		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
 
 	// 删除docker中对应的容器(如果失败了，需要管理员手动操作)

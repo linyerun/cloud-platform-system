@@ -87,7 +87,7 @@ func (l *DeleteLinuxImageLogic) DeleteLinuxImage(req *types.ImageDelRequest) (re
 			return nil, err
 		}
 		return dockerImage, nil
-	})
+	}, models.LinuxImageDocument)
 	if err != nil && err != common.SaveMongoDelDataError {
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
