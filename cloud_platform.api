@@ -140,6 +140,10 @@ service cloud_platform {
 	// 获取异常列表的数据
 	@handler GetExceptionList
 	get /exception/list returns (CommonResponse)
+
+	// 根据Idx删除异常
+	@handler DelExceptionByIdx
+	delete /exception/:idx (DelExceptionByIdxReq) returns (CommonResponse)
 }
 
 @server (
@@ -227,6 +231,9 @@ type (
 	}
 	DelLinuxStopContainerReq {
 		ContainerId string `path:"container_id"`
+	}
+	DelExceptionByIdxReq {
+		Idx uint `path:"idx"`
 	}
 	CommonResponse {
 		Code int         `json:"code"`

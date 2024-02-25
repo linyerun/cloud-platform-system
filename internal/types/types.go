@@ -27,6 +27,10 @@ type CreateAdminRequest struct {
 	Name     string `json:"name"`
 }
 
+type DelExceptionByIdxReq struct {
+	Idx uint `path:"idx"`
+}
+
 type DelLinuxStopContainerReq struct {
 	ContainerId string `path:"container_id"`
 }

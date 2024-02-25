@@ -179,6 +179,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: v4.CreateAdminHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodDelete,
+					Path:    "/exception/:idx",
+					Handler: v4.DelExceptionByIdxHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
 					Path:    "/exception/list",
 					Handler: v4.GetExceptionListHandler(serverCtx),
