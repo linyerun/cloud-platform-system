@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"cloud-platform-system/internal/resp"
 	"cloud-platform-system/internal/types"
 	"cloud-platform-system/internal/utils"
 	"context"
@@ -25,12 +26,13 @@ func (m *JwtAuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 		if err != nil {
 			logx.WithContext(context.Background()).Error(errors.Wrap(err, "parse token error"))
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(types.CommonResponse{Code: 500, Msg: err.Error()})
+			json.NewEncoder(w).Encode(types.CommonResponse{Code: resp.TokenParseError, Msg: resp.MsgMap[resp.TokenParseError]})
 			return
 		}
 		if !obj.IsValid() {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(types.CommonResponse{Code: 400, Msg: "token已过期"})
+			// Token过期的必须返回一个特殊的Code来方便前端进行判断
+			json.NewEncoder(w).Encode(types.CommonResponse{Code: resp.TokenInValidError, Msg: resp.MsgMap[resp.TokenInValidError]})
 			return
 		}
 
