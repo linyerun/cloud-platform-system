@@ -33,7 +33,7 @@ func main() {
 	svcGroup.Add(NewPprofServer(c.Pprof.Port))
 
 	// 添加项目本身的请求处理器
-	server := rest.MustNewServer(c.RestConf)
+	server := rest.MustNewServer(c.RestConf, rest.WithCors()) // rest.WithCors(): 用于解决跨域问题
 	svcGroup.Add(server)
 
 	// 初始化项目全局属性
@@ -51,21 +51,23 @@ func main() {
 	svcGroup.Start()
 }
 
-type pprofServer struct {
+type PprofServer struct {
 	port int
 }
 
-func NewPprofServer(port int) *pprofServer {
-	return &pprofServer{port: port}
+// 开启pprof, 便于排除线上问题
+
+func NewPprofServer(port int) *PprofServer {
+	return &PprofServer{port: port}
 }
 
-func (s *pprofServer) Start() {
+func (s *PprofServer) Start() {
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil); err != nil {
 		log.Fatal(err)
 	}
 	logx.Infof("Start pprof server, listen %d\n", s.port)
 }
 
-func (s *pprofServer) Stop() {
+func (s *PprofServer) Stop() {
 	logx.Info("Stop pprof server")
 }
