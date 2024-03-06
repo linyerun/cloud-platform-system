@@ -56,7 +56,7 @@ type GetImageMsgByIdReq struct {
 }
 
 type GetImageMsgByIdResp struct {
-	CreateorName    string   `json:"createor_name"`
+	CreatorName     string   `json:"creator_name"`
 	CreatorEmail    string   `json:"creator_email"`
 	ImageName       string   `json:"image_name"`
 	ImageTag        string   `json:"image_tag"`
