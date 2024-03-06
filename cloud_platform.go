@@ -68,7 +68,8 @@ func main() {
 		switch e := err.(type) {
 		case *errorx.CodeError:
 
-			return e.Code, map[string]any{"code": e.Code, "msg": e.Msg}
+			// 做出永远返回200, json格式返回值
+			return http.StatusOK, map[string]any{"code": e.Code, "msg": e.Msg}
 		default:
 
 			return http.StatusInternalServerError, map[string]any{"code": http.StatusInternalServerError, "msg": err.Error()}

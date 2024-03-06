@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 
 	"cloud-platform-system/internal/svc"
@@ -30,23 +31,47 @@ func NewLinuxStartApplyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *L
 }
 
 func (l *LinuxStartApplyLogic) LinuxStartApply(req *types.LinuxStartApplyRequest) (resp *types.CommonResponse, err error) {
-	// 校验参数
-	if req.Memory <= 0 || (req.MemorySwap != -1 && req.MemorySwap <= req.Memory) || req.CoreCount <= 0 || req.DiskSize <= 0 || len(req.ContainerName) == 0 {
+	// 校验参数(disk_size忽略)
+	var m = make(map[int64]struct{})
+	if req.Memory <= 0 || (req.MemorySwap != -1 && req.MemorySwap <= req.Memory) || req.CoreCount <= 0 || len(req.ContainerName) == 0 {
 		return &types.CommonResponse{Code: 400, Msg: "参数有误"}, nil
 	}
 	for _, port := range req.ExportPorts {
 		if port < 0 || port >= 65535 {
 			return &types.CommonResponse{Code: 400, Msg: "参数有误, 端口范围是[0, 65535]"}, nil
 		}
+		m[port] = struct{}{}
 	}
 
 	// 判断image_id是否存在
-	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOne(l.ctx, bson.D{{"_id", req.ImageId}}).Err()
-	if err != nil && err != mongo.ErrNoDocuments {
+	res := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOne(l.ctx, bson.D{{"_id", req.ImageId}}, options.FindOne().SetProjection(bson.D{{"must_export_ports", 1}}))
+	if err = res.Err(); err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(errors.Wrap(err, "get models.LinuxImageDocument error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	} else if err == mongo.ErrNoDocuments {
 		return &types.CommonResponse{Code: 400, Msg: "镜像不存在"}, nil
+	}
+
+	// decode
+	image := new(models.LinuxImage)
+	if err = res.Decode(image); err != nil {
+		l.Logger.Error(errors.Wrap(err, "decode models.LinuxImageDocument error"))
+		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
+	}
+
+	// 避免暴露端口重复
+	req.ExportPorts = nil
+	for p1 := range m {
+		flag := true
+		for _, p2 := range image.MustExportPorts {
+			if p1 == p2 {
+				flag = !flag
+				break
+			}
+		}
+		if flag {
+			req.ExportPorts = append(req.ExportPorts, p1)
+		}
 	}
 
 	// 创建Linux服务器申请单

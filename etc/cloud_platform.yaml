@@ -3,6 +3,7 @@ Host: 0.0.0.0
 Port: 8888
 Timeout: 1000000
 Salt: ErineLinSalt    # 哈希加密时用到的盐(密钥)
+Level: info
 
 Log:
   ServiceName: cloud-platform-system
