@@ -55,7 +55,7 @@ func (l *GetImageMsgByIdLogic) GetImageMsgById(req *types.GetImageMsgByIdReq) (r
 
 	// 拼接resp
 	resp = &types.GetImageMsgByIdResp{
-		CreateorName:    user.Name,
+		CreatorName:     user.Name,
 		CreatorEmail:    user.Email,
 		ImageName:       image.Name,
 		ImageTag:        image.Tag,
