@@ -4,7 +4,7 @@ package types
 type ApplicationFormPostRequest struct {
 	AdminId     string `json:"admin_id"`
 	AdminEmail  string `json:"admin_email"`
-	Explaintion string `json:"explaintion"`
+	Explanation string `json:"explantion"`
 }
 
 type CaptchaEmailRequest struct {

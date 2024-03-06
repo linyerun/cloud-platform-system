@@ -51,7 +51,7 @@ func (l *ToUserLogic) ToUser(req *types.ApplicationFormPostRequest) (resp *types
 	}
 
 	// 新增到文档当中
-	af := &models.UserApplicationForm{Id: utils.GetSnowFlakeIdAndBase64(), UserId: user.Id, AdminId: req.AdminId, Status: models.UserApplicationFormStatusIng, Explanation: req.Explaintion}
+	af := &models.UserApplicationForm{Id: utils.GetSnowFlakeIdAndBase64(), UserId: user.Id, AdminId: req.AdminId, Status: models.UserApplicationFormStatusIng, Explanation: req.Explanation}
 	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserApplicationFormDocument).InsertOne(l.ctx, af)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "insert application_form in mongo error"))
