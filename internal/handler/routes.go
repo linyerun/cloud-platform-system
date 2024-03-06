@@ -130,6 +130,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: v3.GetContainerListHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodGet,
+					Path:    "/image/:id",
+					Handler: v3.GetImageMsgByIdHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodDelete,
 					Path:    "/linux/del/:id",
 					Handler: v3.DeleteLinuxImageHandler(serverCtx),
@@ -138,6 +143,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/linux/pull",
 					Handler: v3.PullLinuxImageHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/user/:id",
+					Handler: v3.GetUserMsgByIdHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodDelete,

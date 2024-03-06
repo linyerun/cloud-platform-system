@@ -51,6 +51,29 @@ type GetFormByStatusRequest struct {
 	Status uint `path:"status"`
 }
 
+type GetImageMsgByIdReq struct {
+	Id string `path:"id"`
+}
+
+type GetImageMsgByIdResp struct {
+	CreateorName    string   `json:"createor_name"`
+	CreatorEmail    string   `json:"creator_email"`
+	ImageName       string   `json:"image_name"`
+	ImageTag        string   `json:"image_tag"`
+	ImageSize       int64    `json:"image_size"`
+	EnableCommands  []string `json:"enable_commands"`
+	MustExportPorts []int64  `json:"must_export_ports"`
+}
+
+type GetUserMsgByIdReq struct {
+	Id string `path:"id"`
+}
+
+type GetUserMsgByIdResp struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
 type HandleUserLinuxApplicationReq struct {
 	FormId string `path:"form_id"`
 	Status uint   `path:"status"`

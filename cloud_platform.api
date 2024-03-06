@@ -110,6 +110,14 @@ service cloud_platform {
 	@handler HandleUserLinuxApplication
 	put /user_linux_apply/handle/:form_id/:status (HandleUserLinuxApplicationReq) returns (CommonResponse)
 
+	// 获取用户信息
+	@handler GetUserMsgById
+	get /user/:id (GetUserMsgByIdReq) returns (GetUserMsgByIdResp)
+
+	// 获取镜像信息
+	@handler GetImageMsgById
+	get /image/:id (GetImageMsgByIdReq) returns (GetImageMsgByIdResp)
+
 	// 查看自己管理的用户的容器列表
 	@handler GetContainerList
 	get /container/list returns (CommonResponse)
@@ -234,6 +242,25 @@ type (
 	}
 	DelExceptionByIdxReq {
 		Idx uint `path:"idx"`
+	}
+	GetUserMsgByIdReq {
+		Id string `path:"id"`
+	}
+	GetUserMsgByIdResp {
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+	GetImageMsgByIdReq {
+		Id string `path:"id"`
+	}
+	GetImageMsgByIdResp {
+		CreateorName    string   `json:"createor_name"`
+		CreatorEmail    string   `json:"creator_email"`
+		ImageName       string   `json:"image_name"`
+		ImageTag        string   `json:"image_tag"`
+		ImageSize       int64    `json:"image_size"`
+		EnableCommands  []string `json:"enable_commands"`
+		MustExportPorts []int64  `json:"must_export_ports"`
 	}
 	CommonResponse {
 		Code int         `json:"code"`

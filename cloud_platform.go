@@ -59,7 +59,7 @@ func main() {
 		default:
 
 			// 后面写接口就可以爽一点了
-			return map[string]any{"code": 200, "msg": "成功", "data": t}
+			return map[string]any{"code": 200, "msg": "成功", "data": data}
 		}
 	})
 
