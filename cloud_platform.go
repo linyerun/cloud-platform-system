@@ -72,7 +72,7 @@ func main() {
 			return http.StatusOK, map[string]any{"code": e.Code, "msg": e.Msg}
 		default:
 
-			return http.StatusInternalServerError, map[string]any{"code": http.StatusInternalServerError, "msg": err.Error()}
+			return http.StatusOK, map[string]any{"code": http.StatusInternalServerError, "msg": err.Error()}
 		}
 	})
 
