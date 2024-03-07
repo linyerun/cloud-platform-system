@@ -189,3 +189,8 @@ $ git push origin :refs/tags/<tagname> 可以删除一个远程标签。
 | ubuntu20 | docker run -itd --privileged=true --name c1 -p 20022:22 registry.cn-hangzhou.aliyuncs.com/lyr_public/ubuntu:2.0 /bin/bash |              | systemd, ssh,vim | lsb_release -a |
 
 > 解决debian11和ubuntu20开启自启动ssh服务问题，然后以后这两个配成`CMD ["systemd"]`
+
+# 设置Linux时间
+- date -s "YYYY-YY-DD HH:mm:ss"
+  - 手动修改时间
+- hwclock -w
