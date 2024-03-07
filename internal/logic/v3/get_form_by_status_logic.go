@@ -79,7 +79,7 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 	defer cur.Close(l.ctx)
 
 	type UserApplicationData struct {
-		Id          string `json:"id,omitempty"`
+		Id          string `bson:"_id" json:"id"`
 		Email       string `bson:"email" json:"email"`
 		Name        string `bson:"name" json:"name"`
 		Explanation string `json:"explanation"`
