@@ -76,6 +76,7 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 
 	type UserApplicationData struct {
 		Id          string `bson:"_id" json:"id"`
+		UserId      string `json:"user_id"` // 后期加的
 		Email       string `bson:"email" json:"email"`
 		Name        string `bson:"name" json:"name"`
 		Explanation string `json:"explanation"`
@@ -90,6 +91,7 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 			return &types.CommonResponse{Code: 500, Msg: "decode mongo data error"}, nil
 		}
 		tmp := idToTmp[userApplication.Id]
+		userApplication.UserId = userApplication.Id // 后期加的, 前期为了复用id, 唉!
 		userApplication.Id = tmp.Id
 		userApplication.Explanation = tmp.Explanation
 		userApplication.Status = tmp.Status
