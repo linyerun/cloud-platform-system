@@ -1,6 +1,9 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type ContainerRunCommandOption func(options *containerRunCommandOptions)
 
@@ -18,7 +21,17 @@ func CreateContainerRunCommand(options ...ContainerRunCommandOption) []string {
 	if len(obj.containerCommand) == 0 {
 		return append(obj.commands, obj.image)
 	}
-	return append(obj.commands, obj.image, obj.containerCommand)
+	// 插入image
+	obj.commands = append(obj.commands, obj.image)
+	// 插入container
+	arr := strings.Split(obj.containerCommand, " ")
+	for _, s := range arr {
+		if len(s) == 0 {
+			continue
+		}
+		obj.commands = append(obj.commands, s)
+	}
+	return obj.commands
 }
 
 func WithPortMappingOption(from, to int64) ContainerRunCommandOption {
@@ -77,7 +90,7 @@ func WithImageAndContainerCommand(image string, commands []string) ContainerRunC
 				options.containerCommand = fmt.Sprintf("%s", command)
 				continue
 			}
-			options.containerCommand += fmt.Sprintf("&& %s", command)
+			options.containerCommand += fmt.Sprintf(" && %s", command)
 		}
 	}
 }

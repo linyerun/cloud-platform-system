@@ -14,7 +14,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"go.mongodb.org/mongo-driver/bson"
 	"os/exec"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -145,19 +144,15 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		cmd.Stderr = &errorBuf
 		err = cmd.Run()
 
-		// TODO 为了测试
-		fmt.Println(!regexp.MustCompile("^[a-zA-Z0-9]+$").MatchString(outputBuf.String()))
-		err = nil
-		fmt.Println(outputBuf.String())
-		//if err != nil && !regexp.MustCompile("^[a-zA-Z0-9]+$").MatchString(outputBuf.String()) {
-		//	// 归还端口、删除容器(没有得删那就不管了)
-		//	containerRunRollbackPortsContainer(l.ctx, l.svcCtx, containerName, from, to)
-		//
-		//	// 记录错误日志
-		//	logx.Error(errors.Wrap(err, "run LinuxContainer error: "+errorBuf.String()))
-		//	logx.Error("error output msg:", outputBuf.String())
-		//	return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
-		//}
+		if err != nil {
+			// 归还端口、删除容器(没有得删那就不管了)
+			containerRunRollbackPortsContainer(l.ctx, l.svcCtx, containerName, from, to)
+
+			// 记录错误日志
+			logx.Error(errors.Wrap(err, "run LinuxContainer error: "+errorBuf.String()))
+			logx.Error("error output msg:", outputBuf.String())
+			return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
+		}
 
 		// 将容器信息保存到表单中
 		linux := models.LinuxContainer{
