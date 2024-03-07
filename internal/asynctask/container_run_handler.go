@@ -14,6 +14,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"go.mongodb.org/mongo-driver/bson"
 	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -143,7 +144,7 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		cmd.Stdout = &outputBuf
 		cmd.Stderr = &errorBuf
 		err = cmd.Run()
-		if err != nil {
+		if err != nil && !regexp.MustCompile("^[a-zA-Z0-9]+$").MatchString(outputBuf.String()) {
 			// 归还端口、删除容器(没有得删那就不管了)
 			containerRunRollbackPortsContainer(l.ctx, l.svcCtx, containerName, from, to)
 
