@@ -3,15 +3,15 @@ package v3
 import (
 	"cloud-platform-system/internal/asynctask"
 	"cloud-platform-system/internal/common"
+	"cloud-platform-system/internal/common/errorx"
 	"cloud-platform-system/internal/models"
 	"cloud-platform-system/internal/svc"
 	"cloud-platform-system/internal/types"
 	"cloud-platform-system/internal/utils"
 	"context"
-	"fmt"
 	"github.com/pkg/errors"
-	"github.com/redis/go-redis/v9"
 	"github.com/zeromicro/go-zero/core/logx"
+	"go.mongodb.org/mongo-driver/bson"
 	"time"
 )
 
@@ -30,19 +30,34 @@ func NewHandleUserLinuxApplicationLogic(ctx context.Context, svcCtx *svc.Service
 }
 
 func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.HandleUserLinuxApplicationReq) (resp *types.CommonResponse, err error) {
-	// 使用锁来保证只会提交一个异步处理的任务
-	res := l.svcCtx.RedisClient.SetNX(l.ctx, fmt.Sprintf("linux_application_form_handler: %s", req.FormId), "1", redis.KeepTTL)
-	if err = res.Err(); err != nil {
-		l.Logger.Error(errors.Wrap(err, "error to apply for a distributed lock"))
-		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
+	// 判断status是否合法
+	if req.Status != models.LinuxApplicationFormStatusReject && req.Status != models.LinuxApplicationFormStatusOk {
+		return nil, errorx.NewCodeError(400, "status参数有误, 不能设置为除成功/失败外的其他状态")
 	}
-	ok, err := res.Result()
+
+	// 判断这个form是否存在
+	filter := bson.D{{"_id", req.FormId}}
+	result := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).FindOne(l.ctx, filter)
+	if err = result.Err(); err != nil {
+		logx.Error(errors.Wrap(err, "get LinuxApplicationFormDocument error"))
+		return nil, errorx.NewCodeError(500, "查找申请单失败")
+	}
+	// decode
+	form := new(models.LinuxApplicationForm)
+	if err = result.Decode(form); err != nil {
+		logx.Error(errors.Wrap(err, "decode LinuxApplicationFrom error"))
+		return nil, errorx.NewCodeError(500, "解码申请单数据失败")
+	}
+	// 判断这个申请单是否被处理过了
+	if form.Status != models.LinuxApplicationFormStatusIng {
+		return nil, errorx.NewCodeError(400, "该Linux服务器开启申请单已被处理")
+	}
+
+	// 修改订单状态
+	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).UpdateOne(l.ctx, filter, bson.D{{"$set", bson.M{"status": models.LinuxApplicationFormStatusAsync}}})
 	if err != nil {
-		l.Logger.Error(errors.Wrap(err, "get result from redis error"))
-		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
-	}
-	if !ok {
-		return &types.CommonResponse{Code: 401, Msg: "容器审核异步处理中"}, nil
+		l.Logger.Error(err)
+		return nil, errorx.NewCodeError(500, "更新叮当状态失败")
 	}
 
 	// 把异步任务保存到mongo中等待被执行
@@ -57,13 +72,12 @@ func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.
 	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.AsyncTaskDocument).InsertOne(l.ctx, asyncTask)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "insert async task error"))
-		// 释放分布式锁
-		if err = l.svcCtx.RedisClient.Del(l.ctx, fmt.Sprintf("linux_application_form_handler: %s", req.FormId)).Err(); err != nil {
-			logx.Error(errors.Wrap(err, fmt.Sprintf("linux_application_form_handler: %s", req.FormId)+", 删除失败请即使清除避免系统异常"))
-			l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(fmt.Sprintf("linux_application_form_handler: %s", req.FormId), "需要抓紧手动删除该分布式锁"))
+		err = l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(map[string]any{"table_name": models.LinuxApplicationFormDocument, "_id": req.FormId, "status": form.Status}, "赶紧改成这个status")).Err()
+		if err != nil {
+			l.Logger.Error(common.NewJsonMsgString(map[string]any{"table_name": models.LinuxApplicationFormDocument, "_id": req.FormId, "status": form.Status}, "赶紧改成这个status"))
 		}
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
 
-	return &types.CommonResponse{Code: 200, Msg: "已提交容器审核，等待异步处理"}, nil
+	return &types.CommonResponse{Code: 200, Msg: "已提交审核，等待异步处理"}, nil
 }

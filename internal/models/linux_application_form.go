@@ -5,6 +5,7 @@ const (
 	LinuxApplicationFormStatusIng    = 0
 	LinuxApplicationFormStatusOk     = 1
 	LinuxApplicationFormStatusReject = 2
+	LinuxApplicationFormStatusAsync  = 3
 	LinuxApplicationFormDocument     = "linux_application_forms"
 )
 

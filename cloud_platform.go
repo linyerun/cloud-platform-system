@@ -76,6 +76,9 @@ func main() {
 		}
 	})
 
+	// 关闭stat日志打印，看着太烦了
+	logx.DisableStat()
+
 	// 启动
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	svcGroup.Start()

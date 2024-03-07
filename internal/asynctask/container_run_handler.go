@@ -12,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"os/exec"
 	"strings"
 	"time"
@@ -48,19 +47,10 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 	req := new(ContainerRunArgs)
 	req.JsonUnmarshal(args)
 
-	// 异步任务被执行, 归还分布式锁
-	defer func() {
-		err := l.svcCtx.RedisClient.Del(l.ctx, fmt.Sprintf("linux_application_form_handler: %s", req.FormId)).Err()
-		if err != nil {
-			logx.Error(errors.Wrap(err, fmt.Sprintf("linux_application_form_handler: %s", req.FormId)+", 删除失败请即使清除避免系统异常"))
-			l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(fmt.Sprintf("linux_application_form_handler: %s", req.FormId), "需要抓紧手动删除该分布式锁"))
-		}
-	}()
-
 	// 核心处理逻辑
 	var err error
 
-	// 判断这个申请单是否被处理过了
+	// 获取form
 	filter := bson.D{{"_id", req.FormId}}
 	result := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).FindOne(l.ctx, filter)
 	if err = result.Err(); err != nil {
@@ -73,23 +63,32 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		logx.Error(errors.Wrap(err, "decode LinuxApplicationFrom error"))
 		return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
 	}
-	// 判断申请单的状态
-	if form.Status != models.LinuxApplicationFormStatusIng {
-		return &RespData{Code: 400, Msg: "该Linux服务器开启申请单已被处理"}, models.AsyncTaskFail
-	}
 
 	switch req.Status {
 	case models.LinuxApplicationFormStatusOk:
-		// 修改申请单
-		update := bson.D{{"$set", bson.M{"status": models.LinuxApplicationFormStatusOk, "finish_at": time.Now().UnixMilli()}}}
-		_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).UpdateOne(l.ctx, filter, update)
-		if err != nil {
-			logx.Error(errors.Wrap(err, "update LinuxApplicationFormDocument error"))
-			return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
-		}
+		var containerName string
+		var from, to uint
+
+		// 最后根据处理结果来修改订单状态
+		defer func() {
+			formStatus := models.LinuxApplicationFormStatusOk
+			if status == models.AsyncTaskFail { // 对于执行期间出现异常的，直接拒绝申请处理
+				formStatus = models.LinuxApplicationFormStatusReject
+			}
+			// 最后才修改form的状态
+			update := bson.D{{"$set", bson.M{"status": formStatus, "finish_at": time.Now().UnixMilli()}}}
+			_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).UpdateOne(l.ctx, filter, update)
+			if err != nil {
+				// 需要回滚删除很多东西了
+				containerRunRollbackPortsContainer(l.ctx, l.svcCtx, containerName, from, to)
+				logx.Error(errors.Wrap(err, "update LinuxApplicationFormDocument error"))
+				respData = &RespData{Code: 500, Msg: "update LinuxApplicationFormDocument error"}
+				status = models.AsyncTaskFail
+			}
+		}()
 
 		// 启动容器时需要做的配置
-		containerName := strings.ReplaceAll(utils.GetSnowFlakeIdAndBase64(), "=", ".") // =不能作为container name的符号但是.可以
+		containerName = strings.ReplaceAll(utils.GetSnowFlakeIdAndBase64(), "=", ".") // =不能作为container name的符号但是.可以
 		nameOption := utils.WithNameOption(containerName)
 		coreCountOption := utils.WithCpuCoreCountOption(form.CoreCount)
 		memoryOption := utils.WithMemoryOption(form.Memory)
@@ -99,32 +98,28 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		// 根据image_id获取镜像信息
 		findResult := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOne(l.ctx, bson.D{{"_id", form.ImageId}})
 		if err = findResult.Err(); err != nil {
-			// 复原form
-			containerRunRollback01(l.ctx, req, l.svcCtx)
 			// 记录错误日志
 			logx.Error(errors.Wrap(err, "get image error"))
-			return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
+			return &RespData{Code: 500, Msg: "get image error"}, models.AsyncTaskFail
 		}
 		image := new(models.LinuxImage)
 		if err = findResult.Decode(image); err != nil {
-			// 复原form
-			containerRunRollback01(l.ctx, req, l.svcCtx)
 			// 记录错误日志
 			logx.Error(errors.Wrap(err, "decode image error"))
-			return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
+			return &RespData{Code: 500, Msg: "decode image error"}, models.AsyncTaskFail
 		}
+		// 把用户自定义开启的端口放入image.MustExportPorts中方便后面操作
+		image.MustExportPorts = append(image.MustExportPorts, form.ExportPorts...)
 
 		// 构建容器启动首次需要执行的命令
 		containerRunCommandOption := utils.WithImageAndContainerCommand(image.ImageId, image.EnableCommands)
 
 		// 构建端口映射(只能映射10个端口)
-		from, to, err := l.svcCtx.PortManager.GetTenPort()
+		from, to, err = l.svcCtx.PortManager.GetTenPort()
 		if err != nil {
-			// 复原form
-			containerRunRollback01(l.ctx, req, l.svcCtx)
 			// 记录错误日志
 			logx.Error(errors.Wrap(err, "get ten port error"))
-			return &RespData{Code: 500, Msg: err.Error()}, models.AsyncTaskFail
+			return &RespData{Code: 500, Msg: "get ten port error. " + err.Error()}, models.AsyncTaskFail
 		}
 		var portMappingOptions []utils.ContainerRunCommandOption
 		var portsMapping = make(map[int64]int64)
@@ -140,11 +135,11 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 
 		// 运行Linux容器
 		commands := utils.CreateContainerRunCommand(append(portMappingOptions, nameOption, coreCountOption, memoryOption, memorySwapOption, diskSizeOption, containerRunCommandOption)...)
-		logx.Infof("%v", commands)
+		logx.Infof("运行指令: %v", commands)
 		output, err := exec.Command("docker", commands...).Output()
 		if err != nil {
-			// 复原form、归还端口
-			containerRunRollback02(l.ctx, req, l.svcCtx, from, to)
+			// 归还端口、删除容器(没有得删那就不管了)
+			containerRunRollbackPortsContainer(l.ctx, l.svcCtx, containerName, from, to)
 
 			// 记录错误日志
 			logx.Error(errors.Wrap(err, "run LinuxContainer error: "+string(output)))
@@ -178,7 +173,7 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxContainerDocument).InsertOne(l.ctx, linux)
 		if err != nil {
 			// 回滚前面的修改
-			containerRunRollback03(l.ctx, req, l.svcCtx, containerName, from, to)
+			containerRunRollbackPortsContainer(l.ctx, l.svcCtx, containerName, from, to)
 			logx.Error(errors.Wrap(err, ""))
 			return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
 		}
@@ -186,35 +181,20 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		// 响应信息
 		return &RespData{Code: 200, Msg: "成功"}, models.AsyncTaskOk
 	case models.LinuxApplicationFormStatusReject:
-		filter := bson.D{{"_id", req.FormId}}
+		filter = bson.D{{"_id", req.FormId}}
 		update := bson.D{{"$set", bson.M{"status": models.LinuxApplicationFormStatusReject, "finish_at": time.Now().UnixMilli()}}}
 		_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).UpdateOne(l.ctx, filter, update)
-		if err != nil && err != mongo.ErrNoDocuments {
+		if err != nil {
 			logx.Error(errors.Wrap(err, "update LinuxApplicationFormDocument error"))
-			return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
-		} else if err == mongo.ErrNoDocuments {
-			return &RespData{Code: 400, Msg: "不存在该Linux服务器申请单"}, models.AsyncTaskFail
+			return &RespData{Code: 500, Msg: "update LinuxApplicationFormDocument error"}, models.AsyncTaskFail
 		}
 	default:
 		return &RespData{Code: 400, Msg: "status存在问题"}, models.AsyncTaskFail
 	}
-	return &RespData{Code: 200, Msg: "成功"}, models.AsyncTaskOk
+	return
 }
 
-func containerRunRollback01(ctx context.Context, req *ContainerRunArgs, svcCtx *svc.ServiceContext) {
-	// 复原form
-	filter := bson.D{{"_id", req.FormId}}
-	update := bson.D{{"$set", bson.M{"status": models.LinuxApplicationFormStatusIng, "finish_at": 0}}}
-	_, err := svcCtx.MongoClient.Database(svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).UpdateOne(ctx, filter, update)
-	if err != nil {
-		logx.Error(errors.Wrap(err, "update LinuxApplicationFormDocument error"))
-		svcCtx.RedisClient.RPush(ctx, svcCtx.ExceptionList, common.NewJsonMsgString(update, "把update的信息手动操作到mongo的"+models.LinuxApplicationFormDocument+"表中"))
-	}
-}
-
-func containerRunRollback02(ctx context.Context, req *ContainerRunArgs, svcCtx *svc.ServiceContext, from, to uint) {
-	containerRunRollback01(ctx, req, svcCtx)
-
+func containerRunRollbackPorts(ctx context.Context, svcCtx *svc.ServiceContext, from, to uint) {
 	// 归还端口
 	err := svcCtx.PortManager.RepayTenPort(from, to)
 	if err != nil {
@@ -223,9 +203,9 @@ func containerRunRollback02(ctx context.Context, req *ContainerRunArgs, svcCtx *
 	}
 }
 
-func containerRunRollback03(ctx context.Context, req *ContainerRunArgs, svcCtx *svc.ServiceContext, containerName string, from, to uint) {
-	containerRunRollback02(ctx, req, svcCtx, from, to)
-
+func containerRunRollbackPortsContainer(ctx context.Context, svcCtx *svc.ServiceContext, containerName string, from, to uint) {
+	// 归还端口
+	containerRunRollbackPorts(ctx, svcCtx, from, to)
 	// 删除容器
 	err := svcCtx.DockerClient.RemoveContainer(docker.RemoveContainerOptions{Context: ctx, ID: containerName, Force: true})
 	if err != nil {
