@@ -1,6 +1,7 @@
 package asynctask
 
 import (
+	"bytes"
 	"cloud-platform-system/internal/common"
 	"cloud-platform-system/internal/models"
 	"cloud-platform-system/internal/svc"
@@ -136,13 +137,19 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		// 运行Linux容器
 		commands := utils.CreateContainerRunCommand(append(portMappingOptions, nameOption, coreCountOption, memoryOption, memorySwapOption, diskSizeOption, containerRunCommandOption)...)
 		logx.Infof("运行指令: %v", commands)
-		output, err := exec.Command("docker", commands...).Output()
+		cmd := exec.Command("docker", commands...) // 使用exec包来执行指令
+		logx.Info("command: docker", cmd.String())
+		var outputBuf, errorBuf bytes.Buffer
+		cmd.Stdout = &outputBuf
+		cmd.Stderr = &errorBuf
+		err = cmd.Run()
 		if err != nil {
 			// 归还端口、删除容器(没有得删那就不管了)
 			containerRunRollbackPortsContainer(l.ctx, l.svcCtx, containerName, from, to)
 
 			// 记录错误日志
-			logx.Error(errors.Wrap(err, "run LinuxContainer error: "+string(output)))
+			logx.Error(errors.Wrap(err, "run LinuxContainer error: "+errorBuf.String()))
+			logx.Error("error output msg:", outputBuf.String())
 			return &RespData{Code: 500, Msg: "系统异常"}, models.AsyncTaskFail
 		}
 
