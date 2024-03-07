@@ -111,7 +111,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodGet,
-					Path:    "/application_forms/:status",
+					Path:    "/application_forms/list",
 					Handler: v3.GetFormByStatusHandler(serverCtx),
 				},
 				{

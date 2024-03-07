@@ -30,10 +30,6 @@ func NewGetFormByStatusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest) (resp *types.CommonResponse, err error) {
 	admin := l.ctx.Value("user").(*models.User)
-	// 校验status的范围
-	if req.Status != models.UserApplicationFormStatusIng && req.Status != models.UserApplicationFormStatusOk && req.Status != models.UserApplicationFormStatusReject {
-		return &types.CommonResponse{Code: 400, Msg: "status值错误"}, nil
-	}
 
 	// 查询管理员旗下所有订单
 	filter := bson.D{{"admin_id", admin.Id}}

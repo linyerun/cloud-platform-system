@@ -48,7 +48,6 @@ type GetApplicationFormByStatusRequest struct {
 }
 
 type GetFormByStatusRequest struct {
-	Status uint `path:"status"`
 }
 
 type GetImageMsgByIdReq struct {

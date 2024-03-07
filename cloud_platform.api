@@ -92,7 +92,7 @@ service cloud_platform {
 
 	// 获取不同状态申请单列表(OK)
 	@handler GetFormByStatus
-	get /application_forms/:status (GetFormByStatusRequest) returns (CommonResponse)
+	get /application_forms/list (GetFormByStatusRequest) returns (CommonResponse)
 
 	// 处理游客身份转正申请(OK)
 	@handler VisitorToUser
@@ -216,9 +216,7 @@ type (
 	DeleteUserRequest {
 		UserId string `path:"id"`
 	}
-	GetFormByStatusRequest {
-		Status uint `path:"status"`
-	}
+	GetFormByStatusRequest  {}
 	LinuxStartApplyRequest {
 		ContainerName string  `json:"container_name"`
 		ImageId       string  `json:"image_id"`
