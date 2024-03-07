@@ -55,6 +55,11 @@ func (l *GetUsersLinuxApplicationFormListLogic) GetUsersLinuxApplicationFormList
 		ids = append(ids, ut.UserId)
 	}
 
+	// 名下没有用户, 那就没数据了
+	if len(ids) == 0 {
+		return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
+	}
+
 	// get form msg
 	filter := bson.D{{"user_id", bson.M{"$in": ids}}}
 	cursor, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).Find(l.ctx, filter)
