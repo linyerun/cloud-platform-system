@@ -5,6 +5,7 @@ import (
 	"cloud-platform-system/internal/models"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"cloud-platform-system/internal/svc"
 	"cloud-platform-system/internal/types"
@@ -28,9 +29,11 @@ func NewGetImageMsgByIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 
 func (l *GetImageMsgByIdLogic) GetImageMsgById(req *types.GetImageMsgByIdReq) (resp *types.GetImageMsgByIdResp, err error) {
 	res := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOne(l.ctx, bson.D{{"_id", req.Id}})
-	if err = res.Err(); err != nil {
+	if err = res.Err(); err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(err)
 		return nil, errorx.NewCodeError(500, "获取image_msg数据失败")
+	} else if err == mongo.ErrNoDocuments {
+		return nil, errorx.NewCodeError(401, "该镜像已被管理员删除, 无法查看其信息")
 	}
 
 	// 解析image
