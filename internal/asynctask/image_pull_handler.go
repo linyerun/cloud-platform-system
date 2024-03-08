@@ -29,7 +29,7 @@ func (args *ImagePullArgs) JsonMarshal() string {
 }
 
 func (args *ImagePullArgs) JsonUnmarshal(data string) {
-	json.Unmarshal([]byte(data), args)
+	_ = json.Unmarshal([]byte(data), args)
 }
 
 type ImagePullHandler struct {

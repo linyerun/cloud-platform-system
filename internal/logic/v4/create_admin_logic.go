@@ -1,10 +1,13 @@
 package v4
 
 import (
+	"cloud-platform-system/internal/common/errorx"
 	"cloud-platform-system/internal/models"
 	"cloud-platform-system/internal/utils"
 	"context"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"cloud-platform-system/internal/svc"
 	"cloud-platform-system/internal/types"
@@ -32,7 +35,11 @@ func (l *CreateAdminLogic) CreateAdmin(req *types.CreateAdminRequest) (resp *typ
 		return &types.CommonResponse{Code: 400, Msg: "参数有误"}, nil
 	}
 
-	// 判断邮箱是否重复注册(因为email是唯一索引, 所以无需自己校验)
+	// 判断邮箱是否重复注册
+	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).FindOne(l.ctx, bson.D{{"email", req.Email}}).Err()
+	if err != mongo.ErrNoDocuments {
+		return nil, errorx.NewCodeError(400, "该邮箱已被用于注册")
+	}
 
 	// 以游客身份注册
 	admin := &models.User{
