@@ -38,7 +38,7 @@ func (l *DeleteLinuxImageLogic) DeleteLinuxImage(req *types.ImageDelRequest) (re
 		return &types.CommonResponse{Code: 400, Msg: "不存在此镜像"}, nil
 	} else if err != nil {
 		l.Logger.Error(errors.Wrap(err, "get image msg in mongo error"))
-		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
+		return &types.CommonResponse{Code: 500, Msg: "get image msg in mongo error"}, nil
 	}
 	var dockerImage = new(models.LinuxImage) // 只有ImageId有数据
 	err = res.Decode(dockerImage)
@@ -48,13 +48,13 @@ func (l *DeleteLinuxImageLogic) DeleteLinuxImage(req *types.ImageDelRequest) (re
 	}
 
 	// 根据image_id判断是否又被容器依赖，有则无法被删除
-	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxContainerDocument).Find(l.ctx, bson.D{{"image_id", dockerImage.Id}})
-	if err != nil && err != mongo.ErrNoDocuments {
-		l.Logger.Error(err)
-		return &types.CommonResponse{Code: 500, Msg: "查找 LinuxContainerDocument Error"}, nil
-	} else if err == nil {
-		return &types.CommonResponse{Code: 400, Msg: "不允许删除该镜像，因为还有容器依赖该镜像！"}, nil
-	}
+	//_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxContainerDocument).Find(l.ctx, bson.D{{"image_id", dockerImage.Id}})
+	//if err != nil && err != mongo.ErrNoDocuments {
+	//	l.Logger.Error(err)
+	//	return &types.CommonResponse{Code: 500, Msg: "查找 LinuxContainerDocument Error"}, nil
+	//} else if err == nil {
+	//	return &types.CommonResponse{Code: 400, Msg: "不允许删除该镜像，因为还有容器依赖该镜像！"}, nil
+	//}
 
 	// 获取分布式锁，然后执行删除操作
 	// 使用锁来保证同一个镜像只能有一个管理员删除
@@ -75,11 +75,12 @@ func (l *DeleteLinuxImageLogic) DeleteLinuxImage(req *types.ImageDelRequest) (re
 	defer l.svcCtx.RedisClient.Del(l.ctx, fmt.Sprintf(l.svcCtx.ImagePrefix, dockerImage.ImageId))
 
 	// 执行删除操作
-	err = l.svcCtx.DockerClient.RemoveImage(dockerImage.ImageId)
-	if err != nil {
-		l.Logger.Error(errors.Wrap(err, "remove image error"))
-		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
-	}
+	// 可以不删除实际镜像，然后拉取镜像时判断一下docker镜像仓库里面是否有指定镜像，没有才拉有就不拉(是否可以更新镜像就是再pull一次是否属于更新)
+	//err = l.svcCtx.DockerClient.RemoveImage(dockerImage.ImageId)
+	//if err != nil {
+	//	l.Logger.Error(errors.Wrap(err, "remove image error"))
+	//	return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
+	//}
 
 	// 删除镜像在数据库数据，然后保存于别的文档
 	err = common.DelData(l.Logger, l.svcCtx, func() (any, error) {
