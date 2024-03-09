@@ -17,7 +17,7 @@ func GetDbImageList(svcCtx *svc.ServiceContext, Logger logx.Logger, ctx context.
 	cur, err := svcCtx.MongoClient.Database(svcCtx.Config.Mongo.DbName).Collection(models.DbImageDocument).Find(ctx, bson.D{{"is_deleted", false}})
 	if err == mongo.ErrNoDocuments {
 		return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
-	} else if err == nil {
+	} else if err != nil {
 		Logger.Error(err)
 		return nil, errorx.NewCodeError(500, "get data error")
 	}
