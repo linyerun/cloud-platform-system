@@ -34,7 +34,7 @@ Pprof:
   Port: 9999
 
 AsyncTask:
-  PullTaskWaitMillSec: 5000
+  PullTaskWaitMillSec: 10000
 
 # Linux的初始化设置, 这个host可以用于db中
 Container:

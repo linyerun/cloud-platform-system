@@ -4,6 +4,7 @@ const (
 	AsyncTaskIng      = 0
 	AsyncTaskOk       = 1
 	AsyncTaskFail     = 2
+	AsyncTaskHandling = 3
 	AsyncTaskDocument = "async_tasks"
 )
 
