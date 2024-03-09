@@ -60,6 +60,7 @@ func (m *JwtAuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 		method := r.Method
 		if method != http.MethodDelete && method != http.MethodPut && method != http.MethodPost { // 如果是修改请求，直接放行
 			next(w, newReq)
+			return
 		}
 
 		// 获取锁
