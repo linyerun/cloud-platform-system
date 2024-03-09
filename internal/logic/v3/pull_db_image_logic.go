@@ -56,7 +56,7 @@ func (l *PullDbImageLogic) PullDbImage(req *types.PullDbImageReq) (resp *types.C
 	}
 
 	// 避免重复拉取镜像
-	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbImageDocument).FindOne(l.ctx, bson.D{{"name", req.ImageName}, {"tag", req.ImageTag}}).Err()
+	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbImageDocument).FindOne(l.ctx, bson.D{{"name", req.ImageName}, {"tag", req.ImageTag}, {"is_deleted", false}}).Err()
 	if err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(errors.Wrap(err, "find data in mongo error"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
