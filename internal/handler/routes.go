@@ -66,6 +66,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.JwtAuth, serverCtx.User},
 			[]rest.Route{
 				{
+					Method:  http.MethodPut,
+					Path:    "/db-container/change/:db_id/:status",
+					Handler: v2.UpdateDbStatusHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/db-container/list",
+					Handler: v2.GetDbContainerHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
 					Path:    "/linux_application_form/list",
 					Handler: v2.GetLinuxApplicationFormListHandler(serverCtx),
@@ -87,8 +97,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodPost,
+					Path:    "/user/apply/db",
+					Handler: v2.DbStartApplyHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
 					Path:    "/user/apply/linux",
 					Handler: v2.LinuxStartApplyHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/user/db-image/list",
+					Handler: v2.UserGetDbImagesHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,
@@ -128,6 +148,36 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/container/list",
 					Handler: v3.GetContainerListHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/db-application/:id/:status",
+					Handler: v3.ChangeDbApplicationStatusHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/db-application/list",
+					Handler: v3.GetDbApplicationListHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/db-image/:id",
+					Handler: v3.DelDbImageByIdHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/db-image/:id",
+					Handler: v3.GetDbImageByIdHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/db-image/list",
+					Handler: v3.GetDbImageListHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/db-image/pull",
+					Handler: v3.PullDbImageHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,

@@ -14,7 +14,7 @@ type containerRunCommandOptions struct {
 }
 
 func CreateContainerRunCommand(options ...ContainerRunCommandOption) []string {
-	obj := &containerRunCommandOptions{commands: []string{"run", "--privileged=true", "-itd"}}
+	obj := &containerRunCommandOptions{commands: []string{"run", "--privileged=true", "–-restart", "unless-stopped", "-itd"}}
 	for _, option := range options {
 		option(obj)
 	}

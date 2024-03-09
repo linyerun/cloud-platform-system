@@ -70,7 +70,35 @@ service cloud_platform {
 	// 删除Linux容器(OK)
 	@handler DelLinuxStopContainer
 	delete /linux_container/:container_id (DelLinuxStopContainerReq) returns (CommonResponse)
+
+	// 获取db镜像列表(OK)
+	@handler UserGetDbImages
+	get /user/db-image/list returns (CommonResponse)
+
+	// 提交db申请(OK)
+	@handler DbStartApply
+	post /user/apply/db (DbStartApplyReq) returns (CommonResponse)
+
+	// 获取db实例列表(OK)
+	@handler GetDbContainer
+	get /db-container/list returns (CommonResponse)
+
+	// 关闭/开启/删除容器(OK)
+	@handler UpdateDbStatus
+	put /db-container/change/:db_id/:status (UpdateDbStatusReq) returns (CommonResponse)
 }
+
+type (
+	DbStartApplyReq {
+		DbName      string `json:"db_name"`
+		ImageId     string `json:"image_id"`
+		Explanation string `json:"explanation"`
+	}
+	UpdateDbStatusReq {
+		DbId   string `path:"db_id"`
+		Status uint   `path:"status"`
+	}
+)
 
 @server (
 	prefix:     /v3
@@ -90,7 +118,7 @@ service cloud_platform {
 	@handler AdminGetLinuxImages
 	get /admin/linux/list returns (CommonResponse)
 
-	// 获取不同状态申请单列表(OK)
+	// 获取user申请单列表(OK)
 	@handler GetFormByStatus
 	get /application_forms/list (GetFormByStatusRequest) returns (CommonResponse)
 
@@ -106,7 +134,7 @@ service cloud_platform {
 	@handler GetUsersLinuxApplicationFormList
 	get /users_linux_application_form/list returns (CommonResponse)
 
-	// 处理用户的申请(OK)
+	// 处理用户的Linux申请(OK)
 	@handler HandleUserLinuxApplication
 	put /user_linux_apply/handle/:form_id/:status (HandleUserLinuxApplicationReq) returns (CommonResponse)
 
@@ -118,11 +146,31 @@ service cloud_platform {
 	@handler GetImageMsgById
 	get /image/:id (GetImageMsgByIdReq) returns (GetImageMsgByIdResp)
 
-	// 查看自己管理的用户的容器列表
+	// 获取Db镜像列表(不返回逻辑删除的镜像)(OK)
+	@handler GetDbImageList
+	get /db-image/list returns (CommonResponse)
+
+	// 逻辑删除镜像(OK)
+	@handler DelDbImageById
+	delete /db-image/:id (DelDbImageByIdReq) returns (CommonResponse)
+
+	// 拉取镜像(异步操作)
+	@handler PullDbImage
+	post /db-image/pull (PullDbImageReq) returns (CommonResponse)
+
+	// 获取Db申请单(OK)
+	@handler GetDbApplicationList
+	get /db-application/list returns (CommonResponse)
+
+	// 审核Db申请单(OK)
+	@handler ChangeDbApplicationStatus
+	put /db-application/:id/:status (ChangeDbApplicationStatusReq) returns (CommonResponse)
+
+	// 查看自己管理的用户的容器列表(暂时不用)
 	@handler GetContainerList
 	get /container/list returns (CommonResponse)
 
-	// 删除管理用户的容器
+	// 删除管理用户的容器(暂时不用)
 	@handler DeleteContainer
 	delete /container/:id (DeleteContainerRequest) returns (CommonResponse)
 
@@ -133,7 +181,31 @@ service cloud_platform {
 	// 删除名下用户(暂时不用)
 	@handler DeleteUserById
 	delete /user/del/:id (DeleteUserRequest) returns (CommonResponse)
+
+	// 获取db镜像数据byId
+	@handler GetDbImageById
+	get /db-image/:id (GetDbImageByIdReq) returns (CommonResponse)
 }
+
+type (
+	DelDbImageByIdReq {
+		Id string `path:"id"`
+	}
+	PullDbImageReq {
+		ImageName string `json:"image_name"`
+		ImageTag  string `json:"image_tag"`
+		Type      string `json:"type"`
+		Port      uint   `json:"port"`
+	}
+	ChangeDbApplicationStatusReq {
+		Id           string `path:"id"`
+		Status       uint   `path:"status"`
+		RejectReason string `json:"reject_reason"`
+	}
+	GetDbImageByIdReq {
+		Id string `path:"id"`
+	}
+)
 
 @server (
 	prefix:     /v4

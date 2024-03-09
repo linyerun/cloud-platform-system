@@ -15,6 +15,12 @@ type CaptchaPictureResponse struct {
 	PicData []byte `json:"pic_data"`
 }
 
+type ChangeDbApplicationStatusReq struct {
+	Id           string `path:"id"`
+	Status       uint   `path:"status"`
+	RejectReason string `json:"reject_reason"`
+}
+
 type CommonResponse struct {
 	Code int         `json:"code"`
 	Msg  string      `json:"msg"`
@@ -25,6 +31,16 @@ type CreateAdminRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Name     string `json:"name"`
+}
+
+type DbStartApplyReq struct {
+	DbName      string `json:"db_name"`
+	ImageId     string `json:"image_id"`
+	Explanation string `json:"explanation"`
+}
+
+type DelDbImageByIdReq struct {
+	Id string `path:"id"`
 }
 
 type DelExceptionByIdxReq struct {
@@ -45,6 +61,10 @@ type DeleteUserRequest struct {
 
 type GetApplicationFormByStatusRequest struct {
 	Status uint `path:"status"`
+}
+
+type GetDbImageByIdReq struct {
+	Id string `path:"id"`
 }
 
 type GetFormByStatusRequest struct {
@@ -100,10 +120,22 @@ type LinuxStartApplyRequest struct {
 	DiskSize      uint    `json:"disk_size"`
 }
 
+type PullDbImageReq struct {
+	ImageName string `json:"image_name"`
+	ImageTag  string `json:"image_tag"`
+	Type      string `json:"type"`
+	Port      uint   `json:"port"`
+}
+
 type PutVisitorToUserRequest struct {
 	VisitorId    string `path:"visitor_id"`
 	Status       uint   `path:"status"`
 	VisitorEmail string `json:"visitor_email"`
+}
+
+type UpdateDbStatusReq struct {
+	DbId   string `path:"db_id"`
+	Status uint   `path:"status"`
 }
 
 type UpdateLinuxStatusReq struct {

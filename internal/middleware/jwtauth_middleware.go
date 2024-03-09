@@ -9,13 +9,30 @@ import (
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
+	"sync"
+	"time"
 )
 
 type JwtAuthMiddleware struct {
+	lock              sync.Mutex
+	userUpdateLockMap map[string]chan struct{}
 }
 
 func NewJwtAuthMiddleware() *JwtAuthMiddleware {
-	return &JwtAuthMiddleware{}
+	return &JwtAuthMiddleware{
+		userUpdateLockMap: make(map[string]chan struct{}),
+	}
+}
+
+func (m *JwtAuthMiddleware) getUserLock(id string) (ch chan struct{}) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	ch, ok := m.userUpdateLockMap[id]
+	if !ok { // 获取不到锁就创建一个
+		ch = make(chan struct{}, 1)
+		m.userUpdateLockMap[id] = ch
+	}
+	return ch
 }
 
 func (m *JwtAuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
@@ -38,6 +55,30 @@ func (m *JwtAuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 
 		// 讲数据保存到request中
 		newReq := r.WithContext(context.WithValue(r.Context(), "user", obj.Claims))
+
+		// 这里使用锁保证用户修改操作同时刻只能是被使用一次
+		method := r.Method
+		if method != http.MethodDelete && method != http.MethodPut && method != http.MethodPost { // 如果是修改请求，直接放行
+			next(w, newReq)
+		}
+
+		// 获取锁
+		ch := m.getUserLock(obj.Claims.Id)
+
+		// 5分钟后获取不到锁就放弃
+		select {
+		case ch <- struct{}{}:
+		case <-time.After(5 * time.Minute):
+			// 返回修改失败结果
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(types.CommonResponse{Code: 401, Msg: "执行改变数据的操作失败"})
+			return
+		}
+
+		// 执行修改逻辑
 		next(w, newReq)
+
+		// 释放锁
+		<-ch
 	}
 }

@@ -196,6 +196,7 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 			logx.Error(errors.Wrap(err, "update LinuxApplicationFormDocument error"))
 			return &RespData{Code: 500, Msg: "update LinuxApplicationFormDocument error"}, models.AsyncTaskFail
 		}
+		return &RespData{Code: 200, Msg: "拒绝申请成功"}, models.AsyncTaskOk
 	default:
 		return &RespData{Code: 400, Msg: "status存在问题"}, models.AsyncTaskFail
 	}

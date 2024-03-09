@@ -27,20 +27,25 @@ func NewGetLinuxContainerByUserIdLogic(ctx context.Context, svcCtx *svc.ServiceC
 }
 
 func (l *GetLinuxContainerByUserIdLogic) GetLinuxContainerByUserId() (resp *types.CommonResponse, err error) {
+	// search data
 	doc := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxContainerDocument)
 	cursor, err := doc.Find(l.ctx, bson.D{{"user_id", l.ctx.Value("user").(*models.User).Id}})
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "get LinuxContainerDocument data err"))
 		return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
 	}
+
+	// decode data
 	var containers []*models.LinuxContainer
 	for cursor.Next(l.ctx) {
 		container := new(models.LinuxContainer)
 		if err = cursor.Decode(container); err != nil {
-			l.Logger.Error(errors.Wrap(err, "code LinuxContainerDocument data err"))
-			return &types.CommonResponse{Code: 500, Msg: "系统异常"}, nil
+			l.Logger.Error(errors.Wrap(err, "decode LinuxContainerDocument data err"))
+			return &types.CommonResponse{Code: 500, Msg: "decode LinuxContainerDocument data err"}, nil
 		}
 		containers = append(containers, container)
 	}
+
+	// return data
 	return &types.CommonResponse{Code: 200, Msg: "成功", Data: map[string]any{"linux_containers": containers}}, nil
 }

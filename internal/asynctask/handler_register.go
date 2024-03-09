@@ -25,6 +25,8 @@ func (f *TaskHandlerFactory) NewTaskHandler(taskType string) (handler IAsyncTask
 		handler = NewImagePullHandler(f.ctx, f.srvCtx)
 	case ContainerRunType:
 		handler = NewContainerRunArgsHandler(f.ctx, f.srvCtx)
+	case DbImagePullType:
+		handler = NewDbImagePullHandler(f.ctx, f.srvCtx)
 	default:
 		return nil, false
 	}
