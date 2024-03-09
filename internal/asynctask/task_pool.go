@@ -64,6 +64,7 @@ func (i *MyAsyncTaskPoolServer) Start() {
 				logx.Infof("等待%d秒后再拉取任务", svcCtx.Config.AsyncTask.PullTaskWaitMillSec/1000)
 				// 休眠一段时间后再拉取
 				time.Sleep(time.Millisecond * time.Duration(svcCtx.Config.AsyncTask.PullTaskWaitMillSec))
+				continue
 			}
 
 			// decode async task
