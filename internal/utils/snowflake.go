@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/base64"
 	"errors"
+	"strings"
 	"sync"
 	"time"
 )
@@ -83,6 +84,11 @@ func GetSnowFlakeIdAndBase64() string {
 		id >>= 8
 	}
 	return base64.URLEncoding.EncodeToString(buf)
+}
+
+// GetUniqueDockerContainerName only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed in docker.
+func GetUniqueDockerContainerName() string {
+	return strings.ReplaceAll(GetSnowFlakeIdAndBase64(), "=", ".")
 }
 
 func GetSnowFlakeId() int64 {

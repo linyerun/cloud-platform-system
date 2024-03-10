@@ -14,7 +14,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"go.mongodb.org/mongo-driver/bson"
 	"os/exec"
-	"strings"
 	"time"
 )
 
@@ -89,7 +88,7 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		}()
 
 		// 启动容器时需要做的配置
-		containerName = strings.ReplaceAll(utils.GetSnowFlakeIdAndBase64(), "=", ".") // =不能作为container name的符号但是.可以
+		containerName = utils.GetUniqueDockerContainerName()
 		nameOption := utils.WithNameOption(containerName)
 		coreCountOption := utils.WithCpuCoreCountOption(form.CoreCount)
 		memoryOption := utils.WithMemoryOption(form.Memory)

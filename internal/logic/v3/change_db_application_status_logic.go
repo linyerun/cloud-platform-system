@@ -82,7 +82,7 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 		}
 
 		// 获取启动容器指令
-		dbcName := image.Type + "-" + utils.GetSnowFlakeIdAndBase64()
+		dbcName := image.Type + "-" + utils.GetUniqueDockerContainerName()
 		command, ok := l.getDbCmd(image.Type, image.ImageId, dbcName, image.Password, port, image.Port)
 		if !ok {
 			l.Logger.Error("image type error, image_id is " + image.Id)
@@ -100,8 +100,8 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 			l.repayPort(port)
 			// 记录错误日志
 			l.Logger.Error(err)
-			l.Logger.Error(errorBuf)
-			l.Logger.Error(outputBuf)
+			l.Logger.Error(errorBuf.String())
+			l.Logger.Error(outputBuf.String())
 			return nil, errorx.NewCodeError(500, "run db container error")
 		}
 
