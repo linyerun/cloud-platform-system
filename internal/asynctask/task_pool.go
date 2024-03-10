@@ -18,7 +18,7 @@ import (
 type RespData struct {
 	Code int    `json:"code" bson:"code"`
 	Msg  string `json:"msg" bson:"msg"`
-	Data any    `json:"data" bson:"data"`
+	Data any    `json:"data,omitempty" bson:"data"`
 }
 
 func (r *RespData) JsonMarshal() string {
