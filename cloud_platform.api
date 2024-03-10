@@ -86,6 +86,9 @@ service cloud_platform {
 	// 关闭/开启/删除容器(OK)
 	@handler UpdateDbStatus
 	put /db-container/change/:db_id/:status (UpdateDbStatusReq) returns (CommonResponse)
+
+	@handler GetAdminMsgById
+	get /admin/:id (GetAdminMsgByIdReq) returns (CommonResponse)
 }
 
 type (
@@ -97,6 +100,9 @@ type (
 	UpdateDbStatusReq {
 		DbId   string `path:"db_id"`
 		Status uint   `path:"status"`
+	}
+	GetAdminMsgByIdReq {
+		Id string `path:"id"`
 	}
 )
 

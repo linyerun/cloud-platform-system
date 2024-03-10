@@ -66,6 +66,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.JwtAuth, serverCtx.User},
 			[]rest.Route{
 				{
+					Method:  http.MethodGet,
+					Path:    "/admin/:id",
+					Handler: v2.GetAdminMsgByIdHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodPut,
 					Path:    "/db-container/change/:db_id/:status",
 					Handler: v2.UpdateDbStatusHandler(serverCtx),

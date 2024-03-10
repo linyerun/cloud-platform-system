@@ -59,6 +59,10 @@ type DeleteUserRequest struct {
 	UserId string `path:"id"`
 }
 
+type GetAdminMsgByIdReq struct {
+	Id string `path:"id"`
+}
+
 type GetApplicationFormByStatusRequest struct {
 	Status uint `path:"status"`
 }
