@@ -88,7 +88,7 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 		}()
 
 		// 启动容器时需要做的配置
-		containerName = utils.GetUniqueDockerContainerName()
+		containerName = "linux-" + utils.GetUniqueDockerContainerName()
 		nameOption := utils.WithNameOption(containerName)
 		coreCountOption := utils.WithCpuCoreCountOption(form.CoreCount)
 		memoryOption := utils.WithMemoryOption(form.Memory)
