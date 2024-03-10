@@ -20,7 +20,7 @@ type DbContainer struct {
 	Status    uint  `bson:"status" json:"status"`         // 0: 关闭状态, 1: 开启状态
 
 	Host string `bson:"host" json:"host"` // 主机地址
-	Port uint   `bson:"port"`             // 实际端口
+	Port uint   `bson:"port" json:"port"` // 实际端口
 
 	Type     string `bson:"type" json:"type"`         // 数据库类型
 	Username string `bson:"username" json:"username"` // 登录账号
