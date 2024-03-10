@@ -81,7 +81,7 @@ service cloud_platform {
 
 	// 获取个人DB申请列表
 	@handler GetDbApplicationById
-	get /db-application/list returns (CommonResponse)
+	get /myself/db-application/list returns (CommonResponse)
 
 	// 获取db实例列表(OK)
 	@handler GetDbContainer
@@ -171,7 +171,7 @@ service cloud_platform {
 
 	// 获取Db申请单(OK)
 	@handler GetDbApplicationList
-	get /me/db-application/list returns (CommonResponse)
+	get /db-application/list returns (CommonResponse)
 
 	// 审核Db申请单(OK)
 	@handler ChangeDbApplicationStatus
