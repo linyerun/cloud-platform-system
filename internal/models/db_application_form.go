@@ -4,7 +4,7 @@ const (
 	DbApplicationFormStatusIng    = 0
 	DbApplicationFormStatusOk     = 1
 	DbApplicationFormStatusReject = 2
-	DbApplicationFormDocument     = "linux_application_forms"
+	DbApplicationFormDocument     = "db_application_forms"
 )
 
 type DbApplicationForm struct {

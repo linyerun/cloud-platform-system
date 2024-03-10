@@ -87,6 +87,7 @@ service cloud_platform {
 	@handler UpdateDbStatus
 	put /db-container/change/:db_id/:status (UpdateDbStatusReq) returns (CommonResponse)
 
+	//获取管理员信息(OK)
 	@handler GetAdminMsgById
 	get /admin/:id (GetAdminMsgByIdReq) returns (CommonResponse)
 }
