@@ -135,7 +135,6 @@ func (l *ContainerRunArgsHandler) Execute(args string) (respData *RespData, stat
 
 		// 运行Linux容器
 		commands := utils.CreateContainerRunCommand(append(portMappingOptions, nameOption, coreCountOption, memoryOption, memorySwapOption, diskSizeOption, containerRunCommandOption)...)
-		logx.Infof("运行指令: %v", commands)
 		cmd := exec.Command("docker", commands...) // 使用exec包来执行指令
 		logx.Info("command: docker", cmd.String())
 		var outputBuf, errorBuf bytes.Buffer
