@@ -79,6 +79,10 @@ service cloud_platform {
 	@handler DbStartApply
 	post /user/apply/db (DbStartApplyReq) returns (CommonResponse)
 
+	// 获取个人DB申请列表
+	@handler GetDbApplicationById
+	get /db-application/list returns (CommonResponse)
+
 	// 获取db实例列表(OK)
 	@handler GetDbContainer
 	get /db-container/list returns (CommonResponse)
@@ -167,7 +171,7 @@ service cloud_platform {
 
 	// 获取Db申请单(OK)
 	@handler GetDbApplicationList
-	get /db-application/list returns (CommonResponse)
+	get /me/db-application/list returns (CommonResponse)
 
 	// 审核Db申请单(OK)
 	@handler ChangeDbApplicationStatus

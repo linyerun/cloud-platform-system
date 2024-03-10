@@ -71,6 +71,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: v2.GetAdminMsgByIdHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodGet,
+					Path:    "/db-application/list",
+					Handler: v2.GetDbApplicationByIdHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodPut,
 					Path:    "/db-container/change/:db_id/:status",
 					Handler: v2.UpdateDbStatusHandler(serverCtx),
@@ -160,11 +165,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: v3.ChangeDbApplicationStatusHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodGet,
-					Path:    "/db-application/list",
-					Handler: v3.GetDbApplicationListHandler(serverCtx),
-				},
-				{
 					Method:  http.MethodDelete,
 					Path:    "/db-image/:id",
 					Handler: v3.DelDbImageByIdHandler(serverCtx),
@@ -198,6 +198,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/linux/pull",
 					Handler: v3.PullLinuxImageHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/me/db-application/list",
+					Handler: v3.GetDbApplicationListHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,
