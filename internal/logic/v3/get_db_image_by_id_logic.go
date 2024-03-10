@@ -57,5 +57,5 @@ func (l *GetDbImageByIdLogic) GetDbImageById(req *types.GetDbImageByIdReq) (resp
 	}
 
 	// return data
-	return &types.CommonResponse{Code: 200, Msg: "成功", Data: map[string]any{"db_image": map[string]any{"db_image": db, "user_msg": map[string]any{"email": user.Email, "name": user.Email}}}}, nil
+	return &types.CommonResponse{Code: 200, Msg: "成功", Data: map[string]any{"db_image": map[string]any{"db_image": db, "user_msg": map[string]any{"email": user.Email, "name": user.Name}}}}, nil
 }

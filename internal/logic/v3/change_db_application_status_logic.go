@@ -84,7 +84,7 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 		// 获取启动容器指令
 		dbcName := image.Type + "-" + utils.GetSnowFlakeIdAndBase64()
 		command, ok := l.getDbCmd(image.Type, image.ImageId, dbcName, image.Password, image.Port, port)
-		if ok {
+		if !ok {
 			l.Logger.Error("image type error, image_id is " + image.Id)
 			return nil, errorx.NewCodeError(500, "db image error")
 		}
