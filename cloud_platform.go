@@ -66,7 +66,7 @@ func main() {
 	// 全局异常处理
 	httpx.SetErrorHandler(func(err error) (int, any) {
 		switch e := err.(type) {
-		case *errorx.CodeError:
+		case *errorx.BaseError:
 
 			// 做出永远返回200, json格式返回值
 			return http.StatusOK, map[string]any{"code": e.Code, "msg": e.Msg}

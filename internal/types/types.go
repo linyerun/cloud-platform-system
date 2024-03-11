@@ -21,6 +21,13 @@ type ChangeDbApplicationStatusReq struct {
 	RejectReason string `json:"reject_reason"`
 }
 
+type ChangeUserMsgReq struct {
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Captcha  string `json:"captcha"`
+}
+
 type CommonResponse struct {
 	Code int         `json:"code"`
 	Msg  string      `json:"msg"`

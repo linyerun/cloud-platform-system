@@ -30,13 +30,13 @@ func (l *GetAdminMsgByIdLogic) GetAdminMsgById(req *types.GetAdminMsgByIdReq) (r
 	res := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).FindOne(l.ctx, bson.D{{"_id", req.Id}})
 	if err = res.Err(); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "获取user_msg数据失败")
+		return nil, errorx.NewBaseError(500, "获取user_msg数据失败")
 	}
 
 	user := new(models.User)
 	if err = res.Decode(user); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(400, "解析User数据失败")
+		return nil, errorx.NewBaseError(400, "解析User数据失败")
 	}
 
 	return &types.CommonResponse{Code: 200, Msg: "成功", Data: map[string]any{"email": user.Email, "name": user.Name}}, nil

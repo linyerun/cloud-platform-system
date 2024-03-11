@@ -31,29 +31,29 @@ func (l *GetImageMsgByIdLogic) GetImageMsgById(req *types.GetImageMsgByIdReq) (r
 	res := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxImageDocument).FindOne(l.ctx, bson.D{{"_id", req.Id}})
 	if err = res.Err(); err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "获取image_msg数据失败")
+		return nil, errorx.NewBaseError(500, "获取image_msg数据失败")
 	} else if err == mongo.ErrNoDocuments {
-		return nil, errorx.NewCodeError(401, "该镜像已被管理员删除, 无法查看其信息")
+		return nil, errorx.NewBaseError(401, "该镜像已被管理员删除, 无法查看其信息")
 	}
 
 	// 解析image
 	image := new(models.LinuxImage)
 	if err = res.Decode(image); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(400, "解析Image数据失败")
+		return nil, errorx.NewBaseError(400, "解析Image数据失败")
 	}
 
 	res = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).FindOne(l.ctx, bson.D{{"_id", image.CreatorId}})
 	if err = res.Err(); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "获取user_msg数据失败")
+		return nil, errorx.NewBaseError(500, "获取user_msg数据失败")
 	}
 
 	// 解析user
 	user := new(models.User)
 	if err = res.Decode(user); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(400, "解析User数据失败")
+		return nil, errorx.NewBaseError(400, "解析User数据失败")
 	}
 
 	// 拼接resp

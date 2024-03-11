@@ -34,26 +34,26 @@ func (l *GetDbImageByIdLogic) GetDbImageById(req *types.GetDbImageByIdReq) (resp
 		return &types.CommonResponse{Code: 400, Msg: "id有误获取失败"}, nil
 	} else if err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "get data error")
+		return nil, errorx.NewBaseError(500, "get data error")
 	}
 
 	db := new(models.DbImage)
 	if err = ret.Decode(db); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "decode data error")
+		return nil, errorx.NewBaseError(500, "decode data error")
 	}
 
 	// get creator
 	ret = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).FindOne(l.ctx, bson.D{{"_id", db.CreatorId}})
 	if err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "get data error")
+		return nil, errorx.NewBaseError(500, "get data error")
 	}
 
 	user := new(models.User)
 	if err = ret.Decode(user); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "decode data error")
+		return nil, errorx.NewBaseError(500, "decode data error")
 	}
 
 	// return data

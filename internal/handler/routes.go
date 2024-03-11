@@ -269,6 +269,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodPut,
+					Path:    "/change/user-msg",
+					Handler: v5.ChangeUserMsgHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
 					Path:    "/token/refresh",
 					Handler: v5.RefreshTokenHandler(serverCtx),
 				},

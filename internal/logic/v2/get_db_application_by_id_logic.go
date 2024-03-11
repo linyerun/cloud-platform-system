@@ -42,7 +42,7 @@ func (l *GetDbApplicationByIdLogic) GetDbApplicationById() (resp *types.CommonRe
 		form := new(models.DbApplicationForm)
 		if err = cursor.Decode(form); err != nil {
 			l.Logger.Error(errors.Wrap(err, "decode models.DbApplicationFormDocument error"))
-			return nil, errorx.NewCodeError(500, "decode models.DbApplicationFormDocument error")
+			return nil, errorx.NewBaseError(500, "decode models.DbApplicationFormDocument error")
 		}
 		forms = append(forms, form)
 	}

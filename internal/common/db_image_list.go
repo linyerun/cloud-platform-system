@@ -19,7 +19,7 @@ func GetDbImageList(svcCtx *svc.ServiceContext, Logger logx.Logger, ctx context.
 		return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
 	} else if err != nil {
 		Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "get data error")
+		return nil, errorx.NewBaseError(500, "get data error")
 	}
 
 	var dbs []*models.DbImage
@@ -27,7 +27,7 @@ func GetDbImageList(svcCtx *svc.ServiceContext, Logger logx.Logger, ctx context.
 		db := new(models.DbImage)
 		if err = cur.Decode(db); err != nil {
 			Logger.Error(err)
-			return nil, errorx.NewCodeError(500, "decode data error")
+			return nil, errorx.NewBaseError(500, "decode data error")
 		}
 		dbs = append(dbs, db)
 	}

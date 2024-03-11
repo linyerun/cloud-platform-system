@@ -1,11 +1,13 @@
 package svc
 
 import (
+	"context"
+	"fmt"
+
 	"cloud-platform-system/internal/config"
 	"cloud-platform-system/internal/middleware"
 	"cloud-platform-system/internal/models"
-	"context"
-	"fmt"
+
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"

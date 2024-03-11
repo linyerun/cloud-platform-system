@@ -31,7 +31,7 @@ func (l *CaptchaEmailLogic) CaptchaEmail(req *types.CaptchaEmailRequest) (resp *
 	}
 
 	// 生成验证码图片
-	buff, err := utils.GenerateCaptchaImgBuffer(l.Logger, l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, l.svcCtx.Config.Captcha.Width, l.svcCtx.Config.Captcha.Height)
+	buff, err := utils.GenerateCaptchaImgBufferByEmail(l.svcCtx.RedisClient, l.svcCtx.Config, l.svcCtx.CAPTCHA, req.Email)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "can not generate captcha"))
 		return &types.CommonResponse{Code: 500, Msg: "系统错误，生成验证码失败！"}, nil

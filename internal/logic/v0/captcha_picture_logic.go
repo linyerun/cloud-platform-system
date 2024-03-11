@@ -26,7 +26,7 @@ func NewCaptchaPictureLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ca
 
 func (l *CaptchaPictureLogic) CaptchaPicture() (resp *types.CaptchaPictureResponse, err error) {
 	// 生成验证码图片
-	buff, err := utils.GenerateCaptchaImgBuffer(l.Logger, l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, l.svcCtx.Config.Captcha.Width, l.svcCtx.Config.Captcha.Height)
+	buff, err := utils.GenerateCaptchaImgBuffer(l.Logger, l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, l.svcCtx.Config.Captcha.Width, l.svcCtx.Config.Captcha.Height, l.svcCtx.Config.Captcha.TimeoutSec)
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "can not generate captcha"))
 		return nil, errors.New("系统错误，生成验证码失败！")

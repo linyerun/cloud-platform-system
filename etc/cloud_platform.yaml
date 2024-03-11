@@ -13,6 +13,7 @@ Log:
 Captcha:
   Width: 770
   Height: 360
+  TimeoutSec: 1800
 
 Mongo:
   Address: 192.168.200.133

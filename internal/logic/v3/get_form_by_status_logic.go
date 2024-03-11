@@ -36,7 +36,7 @@ func (l *GetFormByStatusLogic) GetFormByStatus(req *types.GetFormByStatusRequest
 	cur, err := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserApplicationFormDocument).Find(l.ctx, filter, options.Find().SetProjection(bson.D{{"admin_id", 0}}))
 	if err != nil {
 		l.Logger.Error(errors.Wrap(err, "can not get user_application_form data err"))
-		return nil, errorx.NewCodeError(500, "can not get user_application_form data err")
+		return nil, errorx.NewBaseError(500, "can not get user_application_form data err")
 	}
 	defer cur.Close(l.ctx)
 

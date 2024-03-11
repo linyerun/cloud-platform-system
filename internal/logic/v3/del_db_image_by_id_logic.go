@@ -31,7 +31,7 @@ func (l *DelDbImageByIdLogic) DelDbImageById(req *types.DelDbImageByIdReq) (resp
 	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbImageDocument).UpdateOne(l.ctx, bson.D{{"_id", req.Id}}, update)
 	if err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "del image error")
+		return nil, errorx.NewBaseError(500, "del image error")
 	}
 	return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
 }

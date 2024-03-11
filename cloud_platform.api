@@ -246,9 +246,19 @@ service cloud_platform {
 	// 刷新token(OK)
 	@handler RefreshToken
 	put /token/refresh returns (CommonResponse)
+
+	// 修改用户信息
+	@handler ChangeUserMsg
+	put /change/user-msg (ChangeUserMsgReq) returns (CommonResponse)
 }
 
 type (
+	ChangeUserMsgReq {
+		Email    string `json:"email"`
+		Name     string `json:"name"`
+		Password string `json:"password"`
+		Captcha  string `json:"captcha"`
+	}
 	UserRegisterRequest {
 		Email    string `json:"email"`
 		Password string `json:"password"`

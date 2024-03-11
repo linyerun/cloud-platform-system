@@ -36,22 +36,22 @@ func (l *UpdateDbStatusLogic) UpdateDbStatus(req *types.UpdateDbStatusReq) (resp
 	// 根据db_id查找数据库容器
 	ret := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbContainerDocument).FindOne(l.ctx, bson.D{{"_id", req.DbId}})
 	if err = ret.Err(); err == mongo.ErrNoDocuments {
-		return nil, errorx.NewCodeError(400, "this db container not exists")
+		return nil, errorx.NewBaseError(400, "this db container not exists")
 	} else if err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "get db msg error")
+		return nil, errorx.NewBaseError(500, "get db msg error")
 	}
 
 	//decode
 	db := new(models.DbContainer)
 	if err = ret.Decode(db); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "decode db msg error")
+		return nil, errorx.NewBaseError(500, "decode db msg error")
 	}
 
 	// 判断status是否符合要求
 	if req.Status == db.Status {
-		return nil, errorx.NewCodeError(400, "当前数据库正处于此状态")
+		return nil, errorx.NewBaseError(400, "当前数据库正处于此状态")
 	}
 
 	var updateData bson.M
@@ -104,7 +104,7 @@ func (l *UpdateDbStatusLogic) UpdateDbStatus(req *types.UpdateDbStatusReq) (resp
 		// 响应结果(其实只是逻辑删除)
 		return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
 	default:
-		return nil, errorx.NewCodeError(400, "status参数有误")
+		return nil, errorx.NewBaseError(400, "status参数有误")
 	}
 
 	// 执行更新db操作
@@ -115,7 +115,7 @@ func (l *UpdateDbStatusLogic) UpdateDbStatus(req *types.UpdateDbStatusReq) (resp
 			l.Logger.Error(err)
 			l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(map[string]any{"_id": db.Id, "set_data": updateData}, "手动修改db_containers文档数据"))
 		}
-		return nil, errorx.NewCodeError(500, "系统异常")
+		return nil, errorx.NewBaseError(500, "系统异常")
 	}
 
 	return &types.CommonResponse{Code: 200, Msg: "成功"}, nil

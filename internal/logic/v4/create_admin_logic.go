@@ -1,6 +1,7 @@
 package v4
 
 import (
+	"cloud-platform-system/internal/common"
 	"cloud-platform-system/internal/common/errorx"
 	"cloud-platform-system/internal/models"
 	"cloud-platform-system/internal/utils"
@@ -38,7 +39,7 @@ func (l *CreateAdminLogic) CreateAdmin(req *types.CreateAdminRequest) (resp *typ
 	// 判断邮箱是否重复注册
 	err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.UserDocument).FindOne(l.ctx, bson.D{{"email", req.Email}}).Err()
 	if err != mongo.ErrNoDocuments {
-		return nil, errorx.NewCodeError(400, "该邮箱已被用于注册")
+		return nil, errorx.NewBaseError(400, "该邮箱已被用于注册")
 	}
 
 	// 以游客身份注册
@@ -55,7 +56,11 @@ func (l *CreateAdminLogic) CreateAdmin(req *types.CreateAdminRequest) (resp *typ
 		return &types.CommonResponse{Code: 500, Msg: err.Error()}, nil
 	}
 
-	utils.SendTextByEmail(req.Email, "管理员账户生成成功通知", "名称: "+req.Name+"，密码: "+req.Password)
+	err = utils.SendTextByEmail(req.Email, "管理员账户生成成功通知", "名称: "+req.Name+"，密码: "+req.Password)
+	if err != nil {
+		l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(map[string]any{"email": req.Email, "msg": "管理员账户生成成功通知！名称: " + req.Name + "，密码: " + req.Password}, "需要手动写邮箱通知"))
+		return nil, errors.Wrapf(errorx.NewBaseError(500, "发送信息到邮箱失败"), "err: %v, req: %+v", err, req)
+	}
 
 	return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
 }

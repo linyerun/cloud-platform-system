@@ -52,7 +52,7 @@ func (l *PullDbImageLogic) PullDbImage(req *types.PullDbImageReq) (resp *types.C
 
 	// Type必须是存在的
 	if req.Type != models.DbImageTypeMySql && req.Type != models.DbImageTypeRedis && req.Type != models.DbImageTypeMongoDb {
-		return nil, errorx.NewCodeError(400, "type不符合要求")
+		return nil, errorx.NewBaseError(400, "type不符合要求")
 	}
 
 	// 避免重复拉取镜像
@@ -84,7 +84,7 @@ func (l *PullDbImageLogic) PullDbImage(req *types.PullDbImageReq) (resp *types.C
 	args, err := asynctask.GetDbImagePullReqJson(creatorId, req.ImageName, req.ImageTag, req.Type, req.Port)
 	if err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "create async task error")
+		return nil, errorx.NewBaseError(500, "create async task error")
 	}
 	asyncTask := &models.AsyncTask{
 		Id:       utils.GetSnowFlakeIdAndBase64(),

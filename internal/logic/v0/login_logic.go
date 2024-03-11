@@ -29,8 +29,14 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 
 func (l *LoginLogic) Login(req *types.UserLoginRequest) (resp *types.CommonResponse, err error) {
 	// 校验参数
-	if !utils.IsNormalEmail(req.Email) || len(req.Password) < 1 || !utils.IsValidCaptcha(l.Logger, l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, req.Captcha) {
+	if !utils.IsNormalEmail(req.Email) || len(req.Password) < 1 {
 		return &types.CommonResponse{Code: 400, Msg: "参数有误"}, nil
+	}
+
+	// 校验验证码
+	err = utils.IsValidEmailCaptcha(l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, req.Captcha, req.Email)
+	if err != nil {
+		return nil, err
 	}
 
 	// 查询具体信息

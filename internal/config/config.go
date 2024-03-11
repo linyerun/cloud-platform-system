@@ -8,8 +8,9 @@ type Config struct {
 	rest.RestConf
 	Salt    string
 	Captcha struct {
-		Width  int
-		Height int
+		Width      int
+		Height     int
+		TimeoutSec uint
 	}
 	Mongo struct {
 		Address    string

@@ -32,7 +32,7 @@ func NewHandleUserLinuxApplicationLogic(ctx context.Context, svcCtx *svc.Service
 func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.HandleUserLinuxApplicationReq) (resp *types.CommonResponse, err error) {
 	// 判断status是否合法
 	if req.Status != models.LinuxApplicationFormStatusReject && req.Status != models.LinuxApplicationFormStatusOk {
-		return nil, errorx.NewCodeError(400, "status参数有误, 不能设置为除成功/失败外的其他状态")
+		return nil, errorx.NewBaseError(400, "status参数有误, 不能设置为除成功/失败外的其他状态")
 	}
 
 	// 判断这个form是否存在
@@ -40,24 +40,24 @@ func (l *HandleUserLinuxApplicationLogic) HandleUserLinuxApplication(req *types.
 	result := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).FindOne(l.ctx, filter)
 	if err = result.Err(); err != nil {
 		logx.Error(errors.Wrap(err, "get LinuxApplicationFormDocument error"))
-		return nil, errorx.NewCodeError(500, "查找申请单失败")
+		return nil, errorx.NewBaseError(500, "查找申请单失败")
 	}
 	// decode
 	form := new(models.LinuxApplicationForm)
 	if err = result.Decode(form); err != nil {
 		logx.Error(errors.Wrap(err, "decode LinuxApplicationFrom error"))
-		return nil, errorx.NewCodeError(500, "解码申请单数据失败")
+		return nil, errorx.NewBaseError(500, "解码申请单数据失败")
 	}
 	// 判断这个申请单是否被处理过了
 	if form.Status != models.LinuxApplicationFormStatusIng {
-		return nil, errorx.NewCodeError(400, "该Linux服务器开启申请单已被处理")
+		return nil, errorx.NewBaseError(400, "该Linux服务器开启申请单已被处理")
 	}
 
 	// 修改订单状态
 	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.LinuxApplicationFormDocument).UpdateOne(l.ctx, filter, bson.D{{"$set", bson.M{"status": models.LinuxApplicationFormStatusAsync}}})
 	if err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "更新叮当状态失败")
+		return nil, errorx.NewBaseError(500, "更新叮当状态失败")
 	}
 
 	// 把异步任务保存到mongo中等待被执行

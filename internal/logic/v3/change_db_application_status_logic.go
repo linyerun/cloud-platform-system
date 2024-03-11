@@ -40,21 +40,21 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 	// 获取application数据
 	ret := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbApplicationFormDocument).FindOne(l.ctx, bson.D{{"_id", req.Id}})
 	if err = ret.Err(); err == mongo.ErrNoDocuments {
-		return nil, errorx.NewCodeError(400, "this application no exists")
+		return nil, errorx.NewBaseError(400, "this application no exists")
 	} else if err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "get application msg error")
+		return nil, errorx.NewBaseError(500, "get application msg error")
 	}
 	// decode msg
 	form := new(models.DbApplicationForm)
 	if err = ret.Decode(form); err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "decode msg error")
+		return nil, errorx.NewBaseError(500, "decode msg error")
 	}
 
 	// 判断该审核是否可以进行
 	if form.Status != models.DbApplicationFormStatusIng {
-		return nil, errorx.NewCodeError(400, "this application has been checked!")
+		return nil, errorx.NewBaseError(400, "this application has been checked!")
 	}
 
 	switch req.Status {
@@ -62,15 +62,15 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 		// 获取DbImage信息
 		ret = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbImageDocument).FindOne(l.ctx, bson.D{{"_id", form.ImageId}})
 		if err = ret.Err(); err == mongo.ErrNoDocuments {
-			return nil, errorx.NewCodeError(400, "no db image")
+			return nil, errorx.NewBaseError(400, "no db image")
 		} else if err != nil {
 			l.Logger.Error(err)
-			return nil, errorx.NewCodeError(500, "get db image error")
+			return nil, errorx.NewBaseError(500, "get db image error")
 		}
 		image := new(models.DbImage)
 		if err = ret.Decode(image); err != nil {
 			l.Logger.Error(err)
-			return nil, errorx.NewCodeError(500, "decode db image error")
+			return nil, errorx.NewBaseError(500, "decode db image error")
 		}
 
 		// 获取端口
@@ -78,7 +78,7 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 		port, err = l.svcCtx.PortManager.GetSinglePort()
 		if err != nil {
 			l.Error(err)
-			return nil, errorx.NewCodeError(500, "get port from host error")
+			return nil, errorx.NewBaseError(500, "get port from host error")
 		}
 
 		// 获取启动容器指令
@@ -86,7 +86,7 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 		command, ok := l.getDbCmd(image.Type, image.ImageId, dbcName, image.Password, port, image.Port)
 		if !ok {
 			l.Logger.Error("image type error, image_id is " + image.Id)
-			return nil, errorx.NewCodeError(500, "db image error")
+			return nil, errorx.NewBaseError(500, "db image error")
 		}
 
 		// 运行启动指令
@@ -102,7 +102,7 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 			l.Logger.Error(err)
 			l.Logger.Error(errorBuf.String())
 			l.Logger.Error(outputBuf.String())
-			return nil, errorx.NewCodeError(500, "run db container error")
+			return nil, errorx.NewBaseError(500, "run db container error")
 		}
 
 		// 保存容器信息
@@ -133,7 +133,7 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 			l.removeDockerContainer(dbcName)
 			// 记录异常
 			l.Logger.Error(err)
-			return nil, errorx.NewCodeError(500, "start db error")
+			return nil, errorx.NewBaseError(500, "start db error")
 		}
 
 		// 修改容器申请单状态
@@ -143,7 +143,7 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 		if err != nil {
 			l.svcCtx.RedisClient.RPush(l.ctx, l.svcCtx.ExceptionList, common.NewJsonMsgString(map[string]any{"table": models.DbContainerDocument, "_id": req.Id, "updated": update}, "手动修改相关数据(可能被处理多次, 用户被新增多个Db)"))
 			l.Logger.Error(err)
-			return nil, errorx.NewCodeError(500, "系统异常, 修改容器状态失败")
+			return nil, errorx.NewBaseError(500, "系统异常, 修改容器状态失败")
 		}
 	case models.LinuxApplicationFormStatusReject:
 		filter := bson.D{{"_id", req.Id}}
@@ -151,7 +151,7 @@ func (l *ChangeDbApplicationStatusLogic) ChangeDbApplicationStatus(req *types.Ch
 		_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbApplicationFormDocument).UpdateOne(l.ctx, filter, update)
 		if err != nil {
 			l.Logger.Error(err)
-			return nil, errorx.NewCodeError(500, "拒绝申请失败")
+			return nil, errorx.NewBaseError(500, "拒绝申请失败")
 		}
 	default:
 		return &types.CommonResponse{Code: 400, Msg: "status参数有误"}, nil

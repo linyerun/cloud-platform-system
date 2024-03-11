@@ -33,9 +33,9 @@ func (l *DbStartApplyLogic) DbStartApply(req *types.DbStartApplyReq) (resp *type
 	ret := l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbImageDocument).FindOne(l.ctx, bson.D{{"_id", req.ImageId}})
 	if err = ret.Err(); err != nil && err != mongo.ErrNoDocuments {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "get image data error")
+		return nil, errorx.NewBaseError(500, "get image data error")
 	} else if err == mongo.ErrNoDocuments {
-		return nil, errorx.NewCodeError(400, "不存在该DbImage")
+		return nil, errorx.NewBaseError(400, "不存在该DbImage")
 	}
 
 	// 保存申请单
@@ -51,7 +51,7 @@ func (l *DbStartApplyLogic) DbStartApply(req *types.DbStartApplyReq) (resp *type
 	_, err = l.svcCtx.MongoClient.Database(l.svcCtx.Config.Mongo.DbName).Collection(models.DbApplicationFormDocument).InsertOne(l.ctx, form)
 	if err != nil {
 		l.Logger.Error(err)
-		return nil, errorx.NewCodeError(500, "save data error")
+		return nil, errorx.NewBaseError(500, "save data error")
 	}
 
 	return &types.CommonResponse{Code: 200, Msg: "成功"}, nil
