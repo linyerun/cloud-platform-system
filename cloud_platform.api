@@ -24,6 +24,16 @@ service cloud_platform {
 
 	@handler CaptchaEmail // 发送验证码图片到邮箱(OK)
 	get /user/captcha/email (CaptchaEmailRequest) returns (CommonResponse)
+
+	// 忘记密码
+	@handler ChangeForgetPassword
+	put /user/change/pwd (ChangeForgetPasswordReq) returns (CommonResponse)
+}
+
+type ChangeForgetPasswordReq {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Captcha  string `json:"captcha"`
 }
 
 @server (

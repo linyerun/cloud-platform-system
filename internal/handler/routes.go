@@ -29,6 +29,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: v0.CaptchaEmailHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodPut,
+				Path:    "/user/change/pwd",
+				Handler: v0.ChangeForgetPasswordHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/user/login",
 				Handler: v0.LoginHandler(serverCtx),

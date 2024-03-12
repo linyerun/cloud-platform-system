@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	_ "net/http/pprof" // 目的: 让pprof包执行init函数将请求处理函数注册到default请求处理器中
@@ -67,10 +68,16 @@ func main() {
 	httpx.SetErrorHandler(func(err error) (int, any) {
 		switch e := err.(type) {
 		case *errorx.BaseError:
-
 			// 做出永远返回200, json格式返回值
 			return http.StatusOK, map[string]any{"code": e.Code, "msg": e.Msg}
 		default:
+			// 记录系统异常日志
+			logx.Error(err)
+
+			// 如果可以转成BaseError就转, 不行就算
+			if e, ok := errors.Cause(err).(*errorx.BaseError); ok {
+				return http.StatusOK, map[string]any{"code": e.Code, "msg": e.Msg}
+			}
 
 			return http.StatusOK, map[string]any{"code": http.StatusInternalServerError, "msg": err.Error()}
 		}
