@@ -1,8 +1,10 @@
 package svc
 
 import (
+	"cloud-platform-system/internal/utils"
 	"context"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
 
 	"cloud-platform-system/internal/config"
 	"cloud-platform-system/internal/middleware"
@@ -74,6 +76,26 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
+	// 如果没有超级管理员就新增一个
+	err = mongoClient.Database(c.Mongo.DbName).Collection(models.UserDocument).FindOne(context.Background(), bson.D{{"auth", models.SuperAdminAuth}}).Err()
+	if err != nil {
+		logx.Error(err)
+		user := &models.User{
+			Id:       utils.GetSnowFlakeIdAndBase64(),
+			Email:    c.Admin.Email,
+			Password: utils.DoHashAndBase64(c.Salt, "123456"),
+			Name:     "超级管理员",
+			Auth:     models.SuperAdminAuth,
+		}
+
+		// 新增超级管理员
+		if _, err = mongoClient.Database(c.Mongo.DbName).Collection(models.UserDocument).InsertOne(context.Background(), user); err != nil {
+			logx.Error(err)
+			panic(errors.Wrap(err, "create super admin error!"))
+		}
+		logx.Infof("super admin: email=%v, password=123456", user.Email)
+	}
+
 	// 初始化ServiceContext
 	return &ServiceContext{
 		Config: c,
@@ -109,12 +131,12 @@ func newPortObj(redisCli *redis.Client, mongoCli *mongo.Client, config config.Co
 	singlePortKey := "single_port_idx"
 	tenPortKey := "ten_port_idx"
 	// 如果redis中不存在single_port_idx, 初始化为10000
-	err := redisCli.SetNX(context.Background(), singlePortKey, 10000, redis.KeepTTL).Err()
+	err := redisCli.SetNX(context.Background(), singlePortKey, config.PortManager.From, redis.KeepTTL).Err()
 	if err != nil {
 		panic(err)
 	}
 	// 如果redis中不存在ten_port_idx, 初始化为65535
-	err = redisCli.SetNX(context.Background(), tenPortKey, 65535, redis.KeepTTL).Err()
+	err = redisCli.SetNX(context.Background(), tenPortKey, config.PortManager.To, redis.KeepTTL).Err()
 	if err != nil {
 		panic(err)
 	}

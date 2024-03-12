@@ -10,10 +10,17 @@ Log:
   Level: debug
   Path: logs
 
+Admin:
+  Email: linyerun0620@qq.com
+
 Captcha:
   Width: 770
   Height: 360
   TimeoutSec: 1800
+
+PortManager:
+  From: 10000
+  To: 65535
 
 Mongo:
   Address: 192.168.200.133

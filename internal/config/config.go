@@ -12,6 +12,13 @@ type Config struct {
 		Height     int
 		TimeoutSec uint
 	}
+	Admin struct {
+		Email string
+	}
+	PortManager struct {
+		From uint
+		To   uint
+	}
 	Mongo struct {
 		Address    string
 		Port       int
