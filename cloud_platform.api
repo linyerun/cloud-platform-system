@@ -260,9 +260,17 @@ service cloud_platform {
 	// 修改用户信息
 	@handler ChangeUserMsg
 	put /change/user-msg (ChangeUserMsgReq) returns (CommonResponse)
+
+	// 获取用户信息
+	@handler GetUserMsg
+	get /user-msg returns (GetUserMsgResp)
 }
 
 type (
+	GetUserMsgResp {
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
 	ChangeUserMsgReq {
 		Email    string `json:"email"`
 		Name     string `json:"name"`

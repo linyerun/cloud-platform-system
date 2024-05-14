@@ -282,6 +282,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/token/refresh",
 					Handler: v5.RefreshTokenHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/user-msg",
+					Handler: v5.GetUserMsgHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/v5"),

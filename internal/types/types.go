@@ -110,6 +110,11 @@ type GetUserMsgByIdResp struct {
 	Name  string `json:"name"`
 }
 
+type GetUserMsgResp struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
 type HandleUserLinuxApplicationReq struct {
 	FormId string `path:"form_id"`
 	Status uint   `path:"status"`
