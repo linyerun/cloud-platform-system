@@ -15,7 +15,7 @@ var svcCtx *svc.ServiceContext
 
 func init() {
 	var c config.Config
-	conf.MustLoad("../../etc/cloud_platform.yaml", &c)
+	conf.MustLoad("../../etc/cloud_platform-dev.yaml", &c)
 	svcCtx = svc.NewServiceContext(c)
 }
 

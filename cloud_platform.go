@@ -23,7 +23,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-var configFile = flag.String("f", "etc/cloud_platform.yaml", "the config file")
+var configFile = flag.String("f", "etc/cloud_platform-dev.yaml", "the config file")
 
 func main() {
 	flag.Parse()

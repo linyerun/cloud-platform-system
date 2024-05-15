@@ -1,0 +1,51 @@
+Name: cloud_platform
+Host: 0.0.0.0
+Port: 8888
+Timeout: 1000000
+Salt: ErineLinSalt    # 哈希加密时用到的盐(密钥)
+
+Log:
+  ServiceName: cloud-platform-system
+  Encoding: plain
+  Level: debug
+  Path: logs
+
+Admin:
+  Email: linyerun0620@qq.com
+
+Captcha:
+  Width: 770
+  Height: 360
+  TimeoutSec: 1800
+
+PortManager:
+  From: 10000
+  To: 65535
+
+Mongo:
+  Address: 192.168.200.133
+  Port: 7017
+  Username: root
+  Password: root
+  AuthSource: admin
+  DbName: cloud-platform-system
+
+Redis:
+  Address: 192.168.200.133
+  Port: 6399
+  Password: 123456
+
+Jwt:
+  ExpireSec: 1800
+
+Pprof:
+  Port: 9999
+
+AsyncTask:
+  PullTaskWaitMillSec: 10000
+
+# Linux的初始化设置, 这个host可以用于db中
+Container:
+  Host: 192.168.200.133
+  InitUsername: root
+  InitPassword: root
