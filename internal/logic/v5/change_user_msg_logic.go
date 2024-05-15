@@ -32,10 +32,10 @@ func (l *ChangeUserMsgLogic) ChangeUserMsg(req *types.ChangeUserMsgReq) (resp *t
 	id := l.ctx.Value("user").(*models.User).Id
 
 	// 校验验证码
-	err = utils.IsValidEmailCaptcha(l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, req.Captcha, req.Email)
-	if err != nil {
-		return nil, err
-	}
+	//err = utils.IsValidEmailCaptcha(l.svcCtx.RedisClient, l.svcCtx.CAPTCHA, req.Captcha, req.Email)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	update := bson.M{}
 

@@ -28,10 +28,8 @@ type ChangeForgetPasswordReq struct {
 }
 
 type ChangeUserMsgReq struct {
-	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
-	Captcha  string `json:"captcha"`
 }
 
 type CommonResponse struct {
