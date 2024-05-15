@@ -33,7 +33,7 @@ Mongo:
 Redis:
   Address: 192.168.200.133
   Port: 6399
-  Password: 123456
+  Password: "123456"
 
 Jwt:
   ExpireSec: 1800
