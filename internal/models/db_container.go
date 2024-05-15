@@ -4,7 +4,7 @@ const (
 	DbContainerDocument       = "db_containers"
 	DbContainerStatusRunning  = 0
 	DbContainerStatusSleeping = 1
-	DbContainerDel            = 3
+	DbContainerDel            = 2
 )
 
 type DbContainer struct {
